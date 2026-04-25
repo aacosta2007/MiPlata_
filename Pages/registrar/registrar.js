@@ -1,6 +1,5 @@
 import { AppState, showToast } from '../../assets/app.js';
 
-// ── Estado del formulario multi-paso ─────────────────────────
 const state = {
   paso: 1,
   nombreCompleto: '',
@@ -10,7 +9,6 @@ const state = {
   contrasena: '',
 };
 
-// ── Refs DOM ──────────────────────────────────────────────────
 const paso1El  = document.getElementById('paso1');
 const paso2El  = document.getElementById('paso2');
 const paso3El  = document.getElementById('paso3');
@@ -20,26 +18,22 @@ const dot3     = document.getElementById('dot3');
 const line1    = document.getElementById('line1');
 const line2    = document.getElementById('line2');
 
-// Paso 1
 const inNombre  = document.getElementById('nombreCompleto');
 const inId      = document.getElementById('identificacion');
 const inCelular = document.getElementById('celular');
 
-// Paso 2
 const inUsuario  = document.getElementById('usuario');
 const inPass     = document.getElementById('contrasena');
 const inConfirm  = document.getElementById('confirmarPass');
 const pwFill     = document.getElementById('pwFill');
 const pwLabel    = document.getElementById('pwLabel');
 
-// ── Stepper ───────────────────────────────────────────────────
 function irAPaso(n) {
   state.paso = n;
   paso1El.classList.toggle('hidden', n !== 1);
   paso2El.classList.toggle('hidden', n !== 2);
   paso3El.classList.toggle('hidden', n !== 3);
 
-  // Dots
   [dot1, dot2, dot3].forEach((d, i) => {
     d.classList.remove('active', 'done');
     if (i + 1 < n)  d.classList.add('done');
@@ -51,7 +45,6 @@ function irAPaso(n) {
   if (n === 3) rellenarResumen();
 }
 
-// ── Validaciones ──────────────────────────────────────────────
 function mostrarError(id, visible) {
   document.getElementById(id).classList.toggle('hidden', !visible);
 }
@@ -101,7 +94,6 @@ function validarPaso2() {
   return okUsr && okPass && okConf;
 }
 
-// ── Fuerza de contraseña ──────────────────────────────────────
 function calcularFuerza(pass) {
   let score = 0;
   if (pass.length >= 6)  score++;
@@ -132,7 +124,6 @@ inConfirm.addEventListener('input', () => {
   marcarCampo(inConfirm, ok);
 });
 
-// ── Toggle passwords ──────────────────────────────────────────
 document.getElementById('togglePw1').addEventListener('click', () => {
   const btn = document.getElementById('togglePw1');
   inPass.type = inPass.type === 'password' ? 'text' : 'password';
@@ -144,7 +135,6 @@ document.getElementById('togglePw2').addEventListener('click', () => {
   btn.textContent = inConfirm.type === 'password' ? '🔒' : '👁';
 });
 
-// ── Validación de usuario en tiempo real ──────────────────────
 inUsuario.addEventListener('input', () => {
   const val = inUsuario.value.trim();
   const icon = document.getElementById('iconUsuario');
@@ -155,7 +145,6 @@ inUsuario.addEventListener('input', () => {
   mostrarError('errUsuario', !ok);
 });
 
-// ── Resumen paso 3 ────────────────────────────────────────────
 function rellenarResumen() {
   document.getElementById('resNombre').textContent  = state.nombreCompleto;
   document.getElementById('resId').textContent      = state.identificacion;
@@ -163,13 +152,11 @@ function rellenarResumen() {
   document.getElementById('resUsuario').textContent = `@${state.usuario}`;
 }
 
-// ── Shake helper ──────────────────────────────────────────────
 function shakeForm(el) {
   el.classList.add('shake');
   setTimeout(() => el.classList.remove('shake'), 400);
 }
 
-// ── Navegación ────────────────────────────────────────────────
 document.getElementById('btnPaso1').addEventListener('click', () => {
   if (!validarPaso1()) { shakeForm(paso1El); return; }
   state.nombreCompleto = inNombre.value.trim();
@@ -189,7 +176,6 @@ document.getElementById('btnPaso2').addEventListener('click', () => {
 document.getElementById('btnVolver1').addEventListener('click', () => irAPaso(1));
 document.getElementById('btnVolver2').addEventListener('click', () => irAPaso(2));
 
-// ── Registro final ────────────────────────────────────────────
 document.getElementById('btnRegistrar').addEventListener('click', () => {
   const btn = document.getElementById('btnRegistrar');
   btn.disabled = true;
@@ -208,7 +194,6 @@ document.getElementById('btnRegistrar').addEventListener('click', () => {
       showToast(`¡Cuenta creada exitosamente! Bienvenido, ${state.nombreCompleto.split(' ')[0]}.`, 'success', 4000);
       btn.textContent = '✅ ¡Cuenta creada!';
 
-      // Redirigir al login tras 1.5s
       setTimeout(() => {
         window.location.replace('../iniciarSesion/iniciarSesion.html');
       }, 1500);
@@ -218,7 +203,6 @@ document.getElementById('btnRegistrar').addEventListener('click', () => {
       btn.textContent = '✅ Crear Mi Cuenta';
       showToast(err.message, 'error', 5000);
 
-      // Si el error es de usuario duplicado, volver al paso 2
       if (err.message.includes('usuario')) {
         irAPaso(2);
         marcarCampo(inUsuario, false);
@@ -230,10 +214,8 @@ document.getElementById('btnRegistrar').addEventListener('click', () => {
   }, 600);
 });
 
-// ── Limpiar errores al escribir ───────────────────────────────
 [inNombre, inId, inCelular].forEach(inp => {
   inp.addEventListener('input', () => inp.classList.remove('error'));
 });
 
-// ── Init ──────────────────────────────────────────────────────
 irAPaso(1);
