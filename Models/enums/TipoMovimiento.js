@@ -1,7 +1,3 @@
-/**
- * @enum TipoMovimiento
- * @description Define los tipos de movimiento posibles en el sistema bancario.
- */
 const TipoMovimiento = Object.freeze({
   CONSIGNACION: "CONSIGNACION",
   RETIRO: "RETIRO",

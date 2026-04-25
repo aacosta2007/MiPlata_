@@ -1,8 +1,3 @@
-// ============================================================
-// Mi Plata — Session Manager & App State v3.0
-// Multi-usuario con persistencia en localStorage
-// ============================================================
-
 import { Cliente }         from '../Models/entities/Cliente.js';
 import { Movimiento }      from '../Models/entities/Movimiento.js';
 import { CuentaAhorros }   from '../Models/cuentas/CuentaAhorros.js';
@@ -13,8 +8,6 @@ import EstadoCuenta        from '../Models/enums/EstadoCuenta.js';
 const LS_SESSION  = 'miplata_session';
 const LS_USERS    = 'miplata_users';
 const LS_ATTEMPTS = 'miplata_attempts';
-
-// ─── Serialización ────────────────────────────────────────────
 
 function serMovimiento(m) {
   return {
@@ -103,16 +96,12 @@ function deserializarUsuario(p) {
   return { cliente, cuentas: { ahorros, corriente, tarjeta } };
 }
 
-// ─── Helpers ──────────────────────────────────────────────────
-
 function generarNumeroCuenta(tipo) {
   const prefijos = { ahorros: '88', corriente: '48', tarjeta: '44' };
   return `${prefijos[tipo] || '00'}${Math.floor(Math.random() * 90000) + 10000}`;
 }
 
 function generarId() { return Date.now() + Math.floor(Math.random() * 1000); }
-
-// ─── Almacén multi-usuario ────────────────────────────────────
 
 function cargarTodosLosUsuarios() {
   try { return JSON.parse(localStorage.getItem(LS_USERS) || '[]'); }
@@ -124,7 +113,6 @@ function guardarTodosLosUsuarios(usuarios) {
   catch(e) { console.error('Error guardando usuarios:', e); }
 }
 
-// Migrar datos del esquema antiguo (miplata_state) al nuevo (miplata_users)
 function migrarDatosAntiguos() {
   const oldRaw = localStorage.getItem('miplata_state');
   if (!oldRaw) return;
@@ -139,7 +127,6 @@ function migrarDatosAntiguos() {
   } catch {}
 }
 
-// Demo por defecto si no hay ningún usuario
 function inicializarDemoSiVacio() {
   migrarDatosAntiguos();
   const usuarios = cargarTodosLosUsuarios();
@@ -156,8 +143,6 @@ function inicializarDemoSiVacio() {
 }
 
 inicializarDemoSiVacio();
-
-// ─── Sesión activa ────────────────────────────────────────────
 
 function cargarSesionActiva() {
   try {
@@ -180,8 +165,6 @@ function syncEstado() {
   if (idx >= 0) usuarios[idx] = ser; else usuarios.push(ser);
   guardarTodosLosUsuarios(usuarios);
 }
-
-// ─── AppState ─────────────────────────────────────────────────
 
 export const AppState = {
 
@@ -265,7 +248,6 @@ export const AppState = {
     return true;
   },
 
-  // Busca un destinatario por usuario o número de cuenta
   buscarDestinatario(query) {
     const q = query.trim().toLowerCase();
     for (const plain of cargarTodosLosUsuarios()) {
@@ -285,7 +267,6 @@ export const AppState = {
     return null;
   },
 
-  // Transfiere fondos a un usuario externo
   transferirAOtroUsuario(cuentaOrigenTipo, usuarioDestino, monto, concepto = '') {
     if (!_datos) throw new Error('No hay sesión activa.');
     const usuarios = cargarTodosLosUsuarios();
@@ -344,8 +325,6 @@ export const AppState = {
     window.location.reload();
   },
 };
-
-// ─── Utilidades ───────────────────────────────────────────────
 
 export function formatCurrency(n) {
   return '$ ' + Number(n).toLocaleString('es-CO', { minimumFractionDigits: 2 });

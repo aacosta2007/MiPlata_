@@ -309,12 +309,10 @@
   let usadoDiario = 0;
   let destinatarioActual = null;
 
-  // ── Referencias DOM ──────────────────────────────────────────
   const saldoTotal      = document.getElementById('saldoTotal');
   const saldoAhorros    = document.getElementById('saldoAhorros');
   const saldoCorriente  = document.getElementById('saldoCorriente');
 
-  // ── Tabs ──────────────────────────────────────────────────────
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -324,7 +322,6 @@
     });
   });
 
-  // ── Actualizar saldos ─────────────────────────────────────────
   function actualizarSaldos() {
     const a = AppState.getCuentaAhorros().saldo;
     const c = AppState.getCuentaCorriente().saldo;
@@ -335,7 +332,6 @@
     const ah = AppState.getCuentaAhorros();
     const co = AppState.getCuentaCorriente();
 
-    // Actualizar opciones de select con números de cuenta reales
     document.getElementById('optAhorrosO').textContent   = `Ahorros ${maskAccount(ah.numeroCuenta)} — ${formatCurrency(ah.saldo)}`;
     document.getElementById('optCorrienteO').textContent = `Corriente ${maskAccount(co.numeroCuenta)} — ${formatCurrency(co.saldo)}`;
     document.getElementById('optAhorrosD').textContent   = `Ahorros ${maskAccount(ah.numeroCuenta)}`;
@@ -345,14 +341,12 @@
     document.getElementById('consOptAhorros').textContent  = `Ahorros ${maskAccount(ah.numeroCuenta)}`;
     document.getElementById('consOptCorriente').textContent= `Corriente ${maskAccount(co.numeroCuenta)}`;
 
-    // Cupo
     const pct = Math.min((usadoDiario / LIMITE_DIARIO) * 100, 100);
     document.getElementById('cupoUsado').textContent = `Utilizado: ${formatCurrency(usadoDiario)}`;
     document.getElementById('cupoPorc').textContent  = `${Math.round(pct)}%`;
     document.getElementById('cupoFill').style.width  = `${pct}%`;
   }
 
-  // ── Historial reciente ────────────────────────────────────────
   function actualizarHistorialReciente() {
     const movs = AppState.getTodosMovimientos().slice(0, 5);
     const cont = document.getElementById('ultimosMov');
@@ -373,7 +367,6 @@
     }).join('');
   }
 
-  // ── Tab 1: Transferencia entre cuentas propias ────────────────
   const selOrigen  = document.getElementById('cuentaOrigen');
   const selDestino = document.getElementById('cuentaDestino');
   const errCuentas = document.getElementById('errorCuentas');
@@ -416,7 +409,6 @@
     }
   });
 
-  // ── Tab 2: Transferencia a otro usuario ───────────────────────
   const inputBuscar     = document.getElementById('buscarDestinatario');
   const destCard        = document.getElementById('destCard');
   const destInfo        = document.getElementById('destInfo');
@@ -497,7 +489,6 @@
     }
   });
 
-  // ── Tab 3: Consignar ─────────────────────────────────────────
   document.getElementById('btnConsignar').addEventListener('click', () => {
     const tipo = document.getElementById('cuentaConsignar').value;
     const monto = parseFloat(document.getElementById('montoConsignar').value);
@@ -521,7 +512,6 @@
     }
   });
 
-  // ── Init ─────────────────────────────────────────────────────
   actualizarSaldos();
   actualizarHistorialReciente();
 </script>

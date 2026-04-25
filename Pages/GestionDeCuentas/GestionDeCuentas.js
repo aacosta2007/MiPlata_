@@ -1,12 +1,9 @@
 import { AppState, formatCurrency, showToast, buildSidebar, maskAccount } from '../../assets/app.js';
 
-// ── Auth guard — detiene ejecución si no hay sesión ───────────
 try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
 
-// ── Build sidebar ─────────────────────────────────────────────
 buildSidebar('dashboard');
 
-// ── DOM refs ──────────────────────────────────────────────────
 const greeting       = document.getElementById('greeting');
 const saldoAhorros   = document.getElementById('saldoAhorros');
 const numAhorros     = document.getElementById('numAhorros');
@@ -25,7 +22,6 @@ const montoConsignar    = document.getElementById('montoConsignar');
 const errorConsignar    = document.getElementById('errorConsignar');
 const cuentaConsignar   = document.getElementById('cuentaConsignar');
 
-// ── Render dashboard ──────────────────────────────────────────
 function renderDashboard() {
   const cliente   = AppState.getClienteActivo();
   const ahorros   = AppState.getCuentaAhorros();
@@ -36,11 +32,9 @@ function renderDashboard() {
   const saludo = hora < 12 ? 'Buenos días' : hora < 18 ? 'Buenas tardes' : 'Buenas noches';
   greeting.textContent = `${saludo}, ${cliente.nombreCompleto.split(' ')[0]}`;
 
-  // Números de cuenta reales (no hardcodeados)
   numAhorros.textContent    = ahorros.numeroCuenta;
   saldoAhorros.textContent  = formatCurrency(ahorros.saldo);
 
-  // Número de cuenta corriente
   const numCorrienteEl = document.getElementById('numCorriente');
   if (numCorrienteEl) numCorrienteEl.textContent = corriente.numeroCuenta;
   saldoCorriente.textContent = formatCurrency(corriente.saldo);
@@ -53,7 +47,6 @@ function renderDashboard() {
   numTarjeta.textContent   = `•••• •••• •••• ${tarjeta.numeroCuenta}`;
   cupoTarjeta.textContent  = formatCurrency(tarjeta.cupoDisponible);
 
-  // Actualizar opciones del modal con números de cuenta reales del usuario activo
   const modalOptAhorros   = document.getElementById('modalOptAhorros');
   const modalOptCorriente = document.getElementById('modalOptCorriente');
   if (modalOptAhorros)   modalOptAhorros.textContent   = `Ahorros — ${ahorros.numeroCuenta} (${formatCurrency(ahorros.saldo)})`;
@@ -95,13 +88,11 @@ function renderActividad() {
   }).join('');
 }
 
-// ── Modal Consignar ───────────────────────────────────────────
 function abrirModal() {
   montoConsignar.value = '';
   montoConsignar.classList.remove('error');
   errorConsignar.classList.add('hidden');
   modalConsignar.classList.remove('hidden');
-  // Asegurar que el modal sea visible incluso si .hidden falla
   modalConsignar.style.display = 'flex';
   setTimeout(() => montoConsignar.focus(), 50);
 }
@@ -114,7 +105,6 @@ function cerrarModal() {
   errorConsignar.classList.add('hidden');
 }
 
-// Asegurar que el modal esté cerrado al cargar la página
 cerrarModal();
 
 btnConsignar.addEventListener('click', abrirModal);
@@ -155,10 +145,8 @@ montoConsignar.addEventListener('input', () => {
   montoConsignar.classList.remove('error');
 });
 
-// ── Botón Transferir ──────────────────────────────────────────
 btnTransferir.addEventListener('click', () => {
   window.location.href = '../Transacciones/Transacciones.html';
 });
 
-// ── Init ──────────────────────────────────────────────────────
 renderDashboard();
