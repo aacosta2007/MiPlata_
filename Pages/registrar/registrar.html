@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Crear Cuenta</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="registrar.css" />
+</head>
+<body class="login-body">
+
+  <!-- ── NAV TOP ── -->
+  <header class="login-header">
+    <div class="login-logo">Mi Plata</div>
+    <nav class="login-nav">
+      <a href="#">Personal</a>
+      <a href="#">Empresas</a>
+      <a href="#">Inversiones</a>
+    </nav>
+    <div class="login-nav-right">
+      <button class="btn-icon">🔔</button>
+      <span class="lang-switch">ES | EN</span>
+    </div>
+  </header>
+
+  <!-- ── SPLIT LAYOUT ── -->
+  <main class="login-main">
+
+    <!-- Left: Hero -->
+    <section class="login-hero">
+      <div class="hero-badge">
+        <span>🏦</span> APERTURA DE CUENTA
+      </div>
+      <h1 class="hero-title">
+        Bienvenido a<br>
+        <span class="hero-highlight">Mi Plata.</span>
+      </h1>
+      <p class="hero-desc">
+        Abre tu cuenta en minutos y accede a una plataforma de banca privada
+        con tecnología de punta. Tu dinero, tu control.
+      </p>
+      <div class="hero-steps">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-title">Datos Personales</div>
+            <div class="step-desc">Nombre, cédula y número de celular.</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div>
+            <div class="step-title">Credenciales de Acceso</div>
+            <div class="step-desc">Usuario y contraseña seguros para ingresar.</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div>
+            <div class="step-title">Cuentas Creadas Automáticamente</div>
+            <div class="step-desc">Ahorros, Corriente y Tarjeta de Crédito listas al instante.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Form -->
+    <section class="login-form-section">
+      <div class="login-card">
+        <h2 class="login-card-title">Crear Cuenta Nueva</h2>
+        <p class="login-card-sub">Complete los datos para registrarse en Mi Plata.</p>
+
+        <!-- Stepper visual -->
+        <div class="stepper">
+          <div class="step-dot active" id="dot1">1</div>
+          <div class="step-line"      id="line1"></div>
+          <div class="step-dot"       id="dot2">2</div>
+          <div class="step-line"      id="line2"></div>
+          <div class="step-dot"       id="dot3">3</div>
+        </div>
+
+        <!-- ── PASO 1: Datos Personales ── -->
+        <div id="paso1">
+          <div class="form-group mt-8">
+            <label class="form-label" for="nombreCompleto">
+              Nombre Completo <span class="label-hint">como aparece en la cédula</span>
+            </label>
+            <div class="input-wrapper">
+              <input class="form-control" type="text" id="nombreCompleto"
+                placeholder="Ej: María García López" autocomplete="name" />
+              <span class="input-icon">👤</span>
+            </div>
+            <div class="form-error hidden" id="errNombre">⚠ Ingresa tu nombre completo.</div>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label" for="identificacion">
+              Número de Cédula / Identificación
+            </label>
+            <div class="input-wrapper">
+              <input class="form-control" type="text" id="identificacion"
+                placeholder="Ej: 1234567890" autocomplete="off" />
+              <span class="input-icon">🪪</span>
+            </div>
+            <div class="form-error hidden" id="errId">⚠ Ingresa tu número de identificación.</div>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label" for="celular">
+              Número de Celular <span class="label-hint">con indicativo</span>
+            </label>
+            <div class="input-wrapper">
+              <input class="form-control" type="tel" id="celular"
+                placeholder="Ej: +57 300 123 4567" autocomplete="tel" />
+              <span class="input-icon">📱</span>
+            </div>
+            <div class="form-error hidden" id="errCelular">⚠ Ingresa tu número de celular.</div>
+          </div>
+
+          <button class="btn btn-primary btn-full btn-lg mt-24" id="btnPaso1">
+            Continuar →
+          </button>
+          <div class="divider mt-24"></div>
+          <p style="text-align:center; font-size:.875rem; color:var(--gray-500);">
+            ¿Ya tienes cuenta?
+            <a href="../iniciarSesion/iniciarSesion.html" style="color:var(--accent); font-weight:600; text-decoration:none;">
+              Iniciar Sesión
+            </a>
+          </p>
+        </div>
+
+        <!-- ── PASO 2: Credenciales ── -->
+        <div id="paso2" class="hidden">
+          <div class="form-group mt-8">
+            <label class="form-label" for="usuario">
+              Nombre de Usuario <span class="label-hint">para iniciar sesión</span>
+            </label>
+            <div class="input-wrapper">
+              <input class="form-control" type="text" id="usuario"
+                placeholder="Ej: mariagarcia" autocomplete="username" />
+              <span class="input-icon" id="iconUsuario">🔍</span>
+            </div>
+            <div class="form-error hidden" id="errUsuario">⚠ El usuario debe tener al menos 4 caracteres.</div>
+            <div class="form-hint" id="hintUsuario">Sin espacios ni caracteres especiales.</div>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label" for="contrasena">Contraseña</label>
+            <div class="input-wrapper">
+              <input class="form-control" type="password" id="contrasena"
+                placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+              <button type="button" class="input-icon" id="togglePw1">🔒</button>
+            </div>
+            <div class="pw-strength">
+              <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+              <span class="pw-label" id="pwLabel">Ingresa una contraseña</span>
+            </div>
+            <div class="form-error hidden" id="errPass">⚠ La contraseña debe tener al menos 6 caracteres.</div>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label" for="confirmarPass">Confirmar Contraseña</label>
+            <div class="input-wrapper">
+              <input class="form-control" type="password" id="confirmarPass"
+                placeholder="Repite tu contraseña" autocomplete="new-password" />
+              <button type="button" class="input-icon" id="togglePw2">🔒</button>
+            </div>
+            <div class="form-error hidden" id="errConfirm">⚠ Las contraseñas no coinciden.</div>
+          </div>
+
+          <div class="flex gap-16 mt-24">
+            <button class="btn btn-secondary" style="flex:1;" id="btnVolver1">← Volver</button>
+            <button class="btn btn-primary"   style="flex:2;" id="btnPaso2">Revisar →</button>
+          </div>
+        </div>
+
+        <!-- ── PASO 3: Resumen y confirmación ── -->
+        <div id="paso3" class="hidden">
+          <div class="alert alert-info mt-8" style="margin-bottom:20px;">
+            <span>ℹ️</span>
+            <span>Revisa tus datos antes de crear la cuenta. No podrás cambiar la identificación.</span>
+          </div>
+
+          <div class="card" style="background:var(--gray-50); margin-bottom:16px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <div class="form-label">Nombre</div>
+                <div style="font-weight:600; color:var(--gray-800);" id="resNombre">—</div>
+              </div>
+              <div>
+                <div class="form-label">Identificación</div>
+                <div style="font-weight:600; color:var(--gray-800);" id="resId">—</div>
+              </div>
+              <div>
+                <div class="form-label">Celular</div>
+                <div style="font-weight:600; color:var(--gray-800);" id="resCelular">—</div>
+              </div>
+              <div>
+                <div class="form-label">Usuario</div>
+                <div style="font-weight:600; color:var(--accent);" id="resUsuario">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:.78rem; font-weight:700; color:var(--gray-500); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;">
+            Productos que se crearán automáticamente:
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
+            <div class="cuenta-preview">
+              <div class="cuenta-preview-label">Cuenta de Ahorros</div>
+              <div class="cuenta-preview-num">•••• ---- ----</div>
+              <div class="cuenta-preview-tipo">Saldo inicial: $0 | Tasa 1.5% mensual</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <div style="background:var(--gray-800); border-radius:var(--radius-md); padding:14px 16px; color:var(--white);">
+                <div style="font-size:.65rem; opacity:.6; text-transform:uppercase; font-weight:700; letter-spacing:.8px;">Cuenta Corriente</div>
+                <div style="font-family:var(--font-mono); font-size:1rem; margin-top:4px;">•••• ----</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#1E3A5F,#2563EB); border-radius:var(--radius-md); padding:14px 16px; color:var(--white);">
+                <div style="font-size:.65rem; opacity:.6; text-transform:uppercase; font-weight:700; letter-spacing:.8px;">Tarjeta Crédito</div>
+                <div style="font-family:var(--font-mono); font-size:1rem; margin-top:4px;">Cupo $5,000,000</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-16">
+            <button class="btn btn-secondary" style="flex:1;" id="btnVolver2">← Editar</button>
+            <button class="btn btn-primary"   style="flex:2;" id="btnRegistrar">
+              ✅ Crear Mi Cuenta
+            </button>
+          </div>
+        </div>
+
+        <p class="ssl-note">ENCRIPTACIÓN SSL 256-BIT <span class="ssl-dot"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="login-footer">
+    <div>
+      <div class="footer-brand">Mi Plata</div>
+      <p>Entidad financiera supervisada. Su seguridad es nuestra prioridad estructural.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <div class="footer-col-title">LEGAL</div>
+        <a href="#">Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+      </div>
+      <div>
+        <div class="footer-col-title">SOPORTE</div>
+        <a href="#">Seguridad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2024 Mi Plata S.A. Todos los derechos reservados.</div>
+  </footer>
+
+  <script type="module" src="registrar.js"></script>
+</body>
+</html>

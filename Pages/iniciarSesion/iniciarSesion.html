@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Iniciar Sesión</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="iniciarSesion.css" />
+</head>
+<body class="login-body">
+
+  <!-- ── NAV TOP ── -->
+  <header class="login-header">
+    <div class="login-logo">Mi Plata</div>
+    <nav class="login-nav">
+      <a href="#">Personal</a>
+      <a href="#">Empresas</a>
+      <a href="#">Inversiones</a>
+    </nav>
+    <div class="login-nav-right">
+      <button class="btn-icon">🔔</button>
+      <span class="lang-switch">ES | EN</span>
+    </div>
+  </header>
+
+  <!-- ── SPLIT LAYOUT ── -->
+  <main class="login-main">
+
+    <!-- Left: Hero -->
+    <section class="login-hero">
+      <div class="hero-badge">
+        <span>🛡</span> SEGURIDAD INSTITUCIONAL
+      </div>
+      <h1 class="hero-title">
+        Tu patrimonio,<br>
+        <span class="hero-highlight">evolucionado.</span>
+      </h1>
+      <p class="hero-desc">
+        Acceda a la plataforma de banca privada líder en la región.
+        Gestionamos su liquidez con la precisión de una bóveda digital.
+      </p>
+      <div class="hero-features">
+        <div class="feature-card">
+          <span class="feature-icon">🛡</span>
+          <div>
+            <div class="feature-title">Protección Total</div>
+            <div class="feature-desc">Cifrado de grado militar en cada transacción.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📈</span>
+          <div>
+            <div class="feature-title">Análisis Real</div>
+            <div class="feature-desc">Datos precisos en formato contable.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Form -->
+    <section class="login-form-section">
+      <div class="login-card">
+        <h2 class="login-card-title">Ingreso a Banca en Línea</h2>
+        <p class="login-card-sub">Bienvenido a su portal privado de Mi Plata.</p>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group mt-24">
+            <label class="form-label" for="usuario">
+              Usuario
+              <span class="label-hint">nombre de usuario</span>
+            </label>
+            <div class="input-wrapper">
+              <input
+                class="form-control"
+                type="text"
+                id="usuario"
+                name="usuario"
+                placeholder="Ej: alejandro"
+                autocomplete="username"
+              />
+              <span class="input-icon">🪪</span>
+            </div>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label" for="contrasena">Contraseña</label>
+            <div class="input-wrapper">
+              <input
+                class="form-control"
+                type="password"
+                id="contrasena"
+                name="contrasena"
+                placeholder="••••••••"
+                autocomplete="current-password"
+              />
+              <button type="button" class="input-icon btn-toggle-pw" id="togglePw">🔒</button>
+            </div>
+            <a href="#" class="forgot-link">¿Olvidó sus credenciales?</a>
+          </div>
+
+          <!-- Intentos fallidos -->
+          <div id="intentosAlert" class="intentos-alert hidden">
+            <span>⚠</span>
+            <span id="intentosMsg">Intentos fallidos: 0/3</span>
+            <div class="intentos-bar"><div class="intentos-fill" id="intentosFill"></div></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg mt-24" id="btnLogin">
+            Iniciar Sesión Segura →
+          </button>
+
+          <div class="divider mt-24"></div>
+
+          <p class="register-text">¿Aún no tiene acceso a la plataforma?</p>
+          <button type="button" class="btn btn-secondary btn-full mt-8" id="btnRegistrar">
+            Registrarse Ahora
+          </button>
+        </form>
+
+        <p class="ssl-note">ENCRIPTACIÓN SSL 256-BIT <span class="ssl-dot"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="login-footer">
+    <div>
+      <div class="footer-brand">Mi Plata</div>
+      <p>Entidad financiera supervisada. Su seguridad es nuestra prioridad estructural.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <div class="footer-col-title">LEGAL</div>
+        <a href="#">Privacidad</a>
+        <a href="#">Términos y Condiciones</a>
+      </div>
+      <div>
+        <div class="footer-col-title">SOPORTE</div>
+        <a href="#">Seguridad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2024 Mi Plata S.A. Todos los derechos reservados.</div>
+  </footer>
+
+  <script type="module" src="iniciarSesion.js"></script>
+</body>
+</html>

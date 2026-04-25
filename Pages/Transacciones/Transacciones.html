@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Transacciones</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    /* ── Layout ── */
+    .panel-grid { display:grid; grid-template-columns:1fr 340px; gap:20px; }
+
+    /* ── Tabs ── */
+    .tabs { display:flex; gap:0; border-bottom:2px solid var(--gray-200); margin-bottom:24px; }
+    .tab {
+      padding:10px 20px; font-size:.875rem; font-weight:600;
+      color:var(--gray-500); cursor:pointer; border:none; background:none;
+      border-bottom:2px solid transparent; margin-bottom:-2px;
+      transition:all .15s;
+    }
+    .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .tab:hover:not(.active) { color:var(--gray-700); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* ── Saldo bar ── */
+    .saldo-total-bar {
+      background:var(--white); border:1px solid var(--gray-200);
+      border-radius:var(--radius-lg); padding:18px 24px;
+      margin-bottom:20px;
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:12px;
+    }
+    .saldo-total-label { font-size:.75rem; font-weight:700; color:var(--gray-500); text-transform:uppercase; letter-spacing:.5px; }
+
+    /* ── Buscador de destinatario ── */
+    .destinatario-card {
+      background:var(--gray-50); border:1.5px solid var(--gray-200);
+      border-radius:var(--radius-lg); padding:16px 18px;
+      margin-bottom:16px; transition:border-color .2s;
+    }
+    .destinatario-card.encontrado { border-color:var(--success); background:#F0FDF4; }
+    .destinatario-card.error      { border-color:var(--error);   background:var(--error-bg); }
+
+    .destinatario-info {
+      display:flex; align-items:center; gap:12px; margin-top:12px;
+    }
+    .dest-avatar {
+      width:40px; height:40px; border-radius:50%;
+      background:var(--accent); color:var(--white);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; font-weight:700; flex-shrink:0;
+    }
+    .dest-nombre { font-weight:700; color:var(--gray-800); font-size:.9rem; }
+    .dest-cuenta { font-size:.78rem; color:var(--gray-500); font-family:var(--font-mono); }
+
+    /* ── Cupo diario ── */
+    .cupo-info { background:var(--gray-50); border-radius:var(--radius-md); padding:12px 14px; }
+    .cupo-bar  { height:8px; background:var(--gray-200); border-radius:99px; margin-top:8px; overflow:hidden; }
+    .cupo-fill { height:100%; background:var(--accent); border-radius:99px; transition:width .4s; }
+
+    /* ── Seguridad ── */
+    .security-note {
+      background:var(--gray-50); border-radius:var(--radius-md); padding:14px;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+
+    /* ── Historial reciente ── */
+    .mov-row {
+      display:flex; align-items:center; gap:12px;
+      padding:12px 0; border-bottom:1px solid var(--gray-100);
+    }
+    .mov-row:last-child { border-bottom:none; }
+    .mov-icon {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.95rem; flex-shrink:0;
+    }
+    .mov-icon.out { background:var(--error-bg); }
+    .mov-icon.in  { background:var(--success-bg); }
+    .mov-desc { flex:1; font-size:.82rem; color:var(--gray-700); line-height:1.4; }
+    .mov-amt  { font-family:var(--font-mono); font-size:.9rem; font-weight:700; }
+    .mov-amt.out { color:var(--error); }
+    .mov-amt.in  { color:var(--success); }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="topbar">
+      <nav style="display:flex;gap:24px;">
+        <a href="../GestionDeCuentas/GestionDeCuentas.html" style="font-size:.875rem;font-weight:500;color:var(--gray-600);text-decoration:none;">Dashboard</a>
+        <a href="Transacciones.html" style="font-size:.875rem;font-weight:700;color:var(--accent);text-decoration:none;border-bottom:2px solid var(--accent);padding-bottom:2px;">Transacciones</a>
+        <a href="../HistorialDeMovimientos/HistorialDeMovimientos.html" style="font-size:.875rem;font-weight:500;color:var(--gray-600);text-decoration:none;">Historial</a>
+      </nav>
+      <div class="topbar-actions">
+        <button class="btn-icon">🔔<span class="badge"></span></button>
+        <button class="btn btn-primary btn-sm" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Saldo disponible -->
+      <div class="saldo-total-bar">
+        <div>
+          <div class="saldo-total-label">Saldo disponible total</div>
+          <div class="amount-large" id="saldoTotal">$ --</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="saldo-total-label">Cuentas</div>
+          <div style="font-size:.82rem; color:var(--gray-600); margin-top:4px;">
+            Ahorros: <strong id="saldoAhorros">--</strong> &nbsp;|&nbsp;
+            Corriente: <strong id="saldoCorriente">--</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+
+        <!-- Panel principal con tabs -->
+        <div class="card">
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab active" data-tab="propia">↔ Entre Mis Cuentas</button>
+            <button class="tab"        data-tab="externa">🌐 A Otro Usuario</button>
+            <button class="tab"        data-tab="consignar">⬇ Consignar</button>
+          </div>
+
+          <!-- ── TAB 1: Transferencia entre propias ── -->
+          <div class="tab-panel active" id="panel-propia">
+            <div class="grid-2" style="margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label">Cuenta Origen</label>
+                <select class="form-control" id="cuentaOrigen">
+                  <option value="ahorros"   id="optAhorrosO">Ahorros •••• ----</option>
+                  <option value="corriente" id="optCorrienteO">Corriente •••• ----</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cuenta Destino</label>
+                <select class="form-control" id="cuentaDestino">
+                  <option value="corriente" id="optCorrienteD">Corriente •••• ----</option>
+                  <option value="ahorros"   id="optAhorrosD">Ahorros •••• ----</option>
+                </select>
+              </div>
+            </div>
+            <div id="errorCuentas" class="form-error hidden" style="margin-bottom:12px;">
+              ⚠ La cuenta origen y destino no pueden ser iguales.
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Monto a transferir</label>
+              <input class="form-control form-control-mono" type="number"
+                id="montoPropia" placeholder="$ 0.00" min="1" />
+              <div id="errorMontoPropia" class="form-error hidden">⚠ Fondos insuficientes.</div>
+            </div>
+            <div class="form-group" style="margin-bottom:24px;">
+              <label class="form-label">Concepto (opcional)</label>
+              <input class="form-control" type="text" id="conceptoPropia" placeholder="Ej: Ahorro mensual" />
+            </div>
+            <button class="btn btn-primary btn-full" id="btnTransferirPropia">▶ Transferir entre mis cuentas</button>
+          </div>
+
+          <!-- ── TAB 2: Transferencia a otro usuario ── -->
+          <div class="tab-panel" id="panel-externa">
+
+            <!-- Buscador destinatario -->
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Buscar Destinatario
+                <span style="font-weight:400; color:var(--gray-400); text-transform:none;">
+                  — por usuario o número de cuenta
+                </span>
+              </label>
+              <div style="display:flex; gap:10px;">
+                <input class="form-control" type="text" id="buscarDestinatario"
+                  placeholder="Ej: mariagarcia  o  884512345" style="flex:1;" />
+                <button class="btn btn-secondary" id="btnBuscar" style="white-space:nowrap;">🔍 Buscar</button>
+              </div>
+            </div>
+
+            <!-- Card de resultado -->
+            <div class="destinatario-card" id="destCard">
+              <div style="font-size:.78rem; color:var(--gray-500);">
+                Ingresa el usuario o número de cuenta del destinatario y haz clic en Buscar.
+              </div>
+              <div class="destinatario-info hidden" id="destInfo">
+                <div class="dest-avatar" id="destAvatar">--</div>
+                <div>
+                  <div class="dest-nombre" id="destNombre">--</div>
+                  <div class="dest-cuenta" id="destCuenta">--</div>
+                </div>
+                <span style="margin-left:auto;" id="destCheck"></span>
+              </div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label">Cuenta Origen</label>
+                <select class="form-control" id="cuentaOrigenExt">
+                  <option value="ahorros"   id="extOptAhorros">Ahorros •••• ----</option>
+                  <option value="corriente" id="extOptCorriente">Corriente •••• ----</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Monto</label>
+                <input class="form-control form-control-mono" type="number"
+                  id="montoExterno" placeholder="$ 0.00" min="1" />
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:24px;">
+              <label class="form-label">Concepto</label>
+              <input class="form-control" type="text" id="conceptoExterno" placeholder="Ej: Pago de servicio" />
+            </div>
+            <div id="errorExterno" class="form-error hidden" style="margin-bottom:12px;">⚠ —</div>
+            <button class="btn btn-primary btn-full" id="btnTransferirExterno" disabled>
+              🌐 Transferir a otro usuario
+            </button>
+            <div class="form-hint" style="text-align:center; margin-top:8px;">
+              El dinero se acreditará a la cuenta de Ahorros del destinatario.
+            </div>
+          </div>
+
+          <!-- ── TAB 3: Consignar ── -->
+          <div class="tab-panel" id="panel-consignar">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Cuenta Destino</label>
+              <select class="form-control" id="cuentaConsignar">
+                <option value="ahorros"   id="consOptAhorros">Ahorros •••• ----</option>
+                <option value="corriente" id="consOptCorriente">Corriente •••• ----</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Monto a consignar</label>
+              <input class="form-control form-control-mono" type="number"
+                id="montoConsignar" placeholder="$ 0.00" min="1" />
+              <div id="errorConsignar" class="form-error hidden">⚠ Ingresa un monto válido.</div>
+            </div>
+            <div class="form-group" style="margin-bottom:24px;">
+              <label class="form-label">Concepto (opcional)</label>
+              <input class="form-control" type="text" id="conceptoConsignar" placeholder="Ej: Nómina" />
+            </div>
+            <button class="btn btn-primary btn-full" id="btnConsignar">⬇ Consignar</button>
+          </div>
+
+        </div>
+
+        <!-- Panel lateral -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Cupo diario -->
+          <div class="card">
+            <div class="cupo-info">
+              <div style="font-size:.82rem;font-weight:700;color:var(--gray-700);">Cupo de Transferencia Diaria</div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                <span class="text-xs text-muted" id="cupoUsado">Utilizado: $0</span>
+                <span class="text-xs" style="font-weight:700;color:var(--accent);" id="cupoPorc">0%</span>
+              </div>
+              <div class="cupo-bar">
+                <div class="cupo-fill" id="cupoFill" style="width:0%"></div>
+              </div>
+              <div class="text-xs text-muted" style="margin-top:6px;">Límite diario: $5,000,000. Se restablece en 14 horas.</div>
+            </div>
+          </div>
+
+          <!-- Últimas transacciones -->
+          <div class="card">
+            <div style="font-size:.875rem;font-weight:700;color:var(--gray-800);margin-bottom:14px;">🕐 Últimas Transacciones</div>
+            <div id="ultimosMov">
+              <div class="text-xs text-muted" style="text-align:center;padding:20px 0;">Sin movimientos aún.</div>
+            </div>
+            <a href="../HistorialDeMovimientos/HistorialDeMovimientos.html"
+              style="display:block;text-align:center;font-size:.78rem;font-weight:600;color:var(--accent);margin-top:12px;text-decoration:none;">
+              Ver historial completo →
+            </a>
+          </div>
+
+          <!-- Seguridad -->
+          <div class="card">
+            <div class="security-note">
+              <span style="font-size:1.2rem;">🛡</span>
+              <div>
+                <div style="font-size:.78rem;font-weight:700;color:var(--gray-700);text-transform:uppercase;letter-spacing:.5px;">TRANSACCIÓN PROTEGIDA</div>
+                <div style="font-size:.78rem;color:var(--gray-500);margin-top:4px;line-height:1.5;">
+                  Esta operación está cifrada de extremo a extremo y se registra en el historial inmediatamente.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="#">PRIVACIDAD</a><a href="#">TÉRMINOS</a><a href="#">SEGURIDAD</a>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<script type="module">
+  import { AppState, formatCurrency, showToast, buildSidebar, maskAccount } from '../../assets/app.js';
+  try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
+  buildSidebar('transacc');
+
+  const LIMITE_DIARIO = 5000000;
+  let usadoDiario = 0;
+  let destinatarioActual = null;
+
+  // ── Referencias DOM ──────────────────────────────────────────
+  const saldoTotal      = document.getElementById('saldoTotal');
+  const saldoAhorros    = document.getElementById('saldoAhorros');
+  const saldoCorriente  = document.getElementById('saldoCorriente');
+
+  // ── Tabs ──────────────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+    });
+  });
+
+  // ── Actualizar saldos ─────────────────────────────────────────
+  function actualizarSaldos() {
+    const a = AppState.getCuentaAhorros().saldo;
+    const c = AppState.getCuentaCorriente().saldo;
+    saldoTotal.textContent    = formatCurrency(a + c);
+    saldoAhorros.textContent  = formatCurrency(a);
+    saldoCorriente.textContent = formatCurrency(c);
+
+    const ah = AppState.getCuentaAhorros();
+    const co = AppState.getCuentaCorriente();
+
+    // Actualizar opciones de select con números de cuenta reales
+    document.getElementById('optAhorrosO').textContent   = `Ahorros ${maskAccount(ah.numeroCuenta)} — ${formatCurrency(ah.saldo)}`;
+    document.getElementById('optCorrienteO').textContent = `Corriente ${maskAccount(co.numeroCuenta)} — ${formatCurrency(co.saldo)}`;
+    document.getElementById('optAhorrosD').textContent   = `Ahorros ${maskAccount(ah.numeroCuenta)}`;
+    document.getElementById('optCorrienteD').textContent = `Corriente ${maskAccount(co.numeroCuenta)}`;
+    document.getElementById('extOptAhorros').textContent   = `Ahorros ${maskAccount(ah.numeroCuenta)} — ${formatCurrency(ah.saldo)}`;
+    document.getElementById('extOptCorriente').textContent = `Corriente ${maskAccount(co.numeroCuenta)} — ${formatCurrency(co.saldo)}`;
+    document.getElementById('consOptAhorros').textContent  = `Ahorros ${maskAccount(ah.numeroCuenta)}`;
+    document.getElementById('consOptCorriente').textContent= `Corriente ${maskAccount(co.numeroCuenta)}`;
+
+    // Cupo
+    const pct = Math.min((usadoDiario / LIMITE_DIARIO) * 100, 100);
+    document.getElementById('cupoUsado').textContent = `Utilizado: ${formatCurrency(usadoDiario)}`;
+    document.getElementById('cupoPorc').textContent  = `${Math.round(pct)}%`;
+    document.getElementById('cupoFill').style.width  = `${pct}%`;
+  }
+
+  // ── Historial reciente ────────────────────────────────────────
+  function actualizarHistorialReciente() {
+    const movs = AppState.getTodosMovimientos().slice(0, 5);
+    const cont = document.getElementById('ultimosMov');
+    if (movs.length === 0) {
+      cont.innerHTML = '<div class="text-xs text-muted" style="text-align:center;padding:20px 0;">Sin movimientos aún.</div>';
+      return;
+    }
+    const tipoOut = ['RETIRO','TRANSFERENCIA_OUT'];
+    cont.innerHTML = movs.map(m => {
+      const esOut = tipoOut.includes(m.tipo);
+      const icon  = esOut ? '↑' : '↓';
+      return `
+        <div class="mov-row">
+          <div class="mov-icon ${esOut ? 'out' : 'in'}">${icon}</div>
+          <div class="mov-desc">${m.descripcion}</div>
+          <div class="mov-amt ${esOut ? 'out' : 'in'}">${esOut ? '-' : '+'}${formatCurrency(m.valor)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Tab 1: Transferencia entre cuentas propias ────────────────
+  const selOrigen  = document.getElementById('cuentaOrigen');
+  const selDestino = document.getElementById('cuentaDestino');
+  const errCuentas = document.getElementById('errorCuentas');
+
+  function getCuentaPropia(val) {
+    return val === 'ahorros' ? AppState.getCuentaAhorros() : AppState.getCuentaCorriente();
+  }
+
+  function validarCuentasDiferentes() {
+    const misma = selOrigen.value === selDestino.value;
+    errCuentas.classList.toggle('hidden', !misma);
+    return !misma;
+  }
+
+  selOrigen.addEventListener('change', validarCuentasDiferentes);
+  selDestino.addEventListener('change', validarCuentasDiferentes);
+
+  document.getElementById('btnTransferirPropia').addEventListener('click', () => {
+    if (!validarCuentasDiferentes()) return;
+    const monto = parseFloat(document.getElementById('montoPropia').value);
+    const errEl = document.getElementById('errorMontoPropia');
+    if (isNaN(monto) || monto <= 0) {
+      errEl.textContent = '⚠ Ingresa un monto válido mayor a 0.';
+      errEl.classList.remove('hidden'); return;
+    }
+    try {
+      const origen  = getCuentaPropia(selOrigen.value);
+      const destino = getCuentaPropia(selDestino.value);
+      origen.transferir(destino, monto);
+      AppState.guardar();
+      usadoDiario += monto;
+      document.getElementById('montoPropia').value = '';
+      errEl.classList.add('hidden');
+      showToast(`✅ Transferencia de ${formatCurrency(monto)} realizada.`, 'success');
+      actualizarSaldos();
+      actualizarHistorialReciente();
+    } catch(err) {
+      errEl.textContent = '⚠ ' + err.message;
+      errEl.classList.remove('hidden');
+    }
+  });
+
+  // ── Tab 2: Transferencia a otro usuario ───────────────────────
+  const inputBuscar     = document.getElementById('buscarDestinatario');
+  const destCard        = document.getElementById('destCard');
+  const destInfo        = document.getElementById('destInfo');
+  const btnTransExterno = document.getElementById('btnTransferirExterno');
+  const errExterno      = document.getElementById('errorExterno');
+
+  function limpiarDestinatario() {
+    destinatarioActual = null;
+    destCard.className = 'destinatario-card';
+    destInfo.classList.add('hidden');
+    destCard.querySelector('div').textContent = 'Ingresa el usuario o número de cuenta del destinatario y haz clic en Buscar.';
+    btnTransExterno.disabled = true;
+  }
+
+  document.getElementById('btnBuscar').addEventListener('click', () => {
+    const query = inputBuscar.value.trim();
+    if (!query) { showToast('Ingresa un usuario o número de cuenta.', 'warning'); return; }
+
+    const resultado = AppState.buscarDestinatario(query);
+    if (!resultado) {
+      destCard.className = 'destinatario-card error';
+      destCard.querySelector('div').textContent = `❌ No se encontró ningún usuario con "${query}". Verifica el dato e intenta de nuevo.`;
+      destInfo.classList.add('hidden');
+      destinatarioActual = null;
+      btnTransExterno.disabled = true;
+      return;
+    }
+
+    destinatarioActual = resultado;
+    destCard.className = 'destinatario-card encontrado';
+    destCard.querySelector('div').textContent = '✅ Destinatario encontrado:';
+    const iniciales = resultado.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('destAvatar').textContent = iniciales;
+    document.getElementById('destNombre').textContent = resultado.nombreCompleto;
+    document.getElementById('destCuenta').textContent = `@${resultado.usuario} — Cuenta ${resultado.tipoCuenta}: ${resultado.numeroCuenta}`;
+    document.getElementById('destCheck').textContent = '✅';
+    destInfo.classList.remove('hidden');
+    btnTransExterno.disabled = false;
+  });
+
+  inputBuscar.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btnBuscar').click();
+  });
+
+  inputBuscar.addEventListener('input', limpiarDestinatario);
+
+  btnTransExterno.addEventListener('click', () => {
+    if (!destinatarioActual) { showToast('Primero busca un destinatario.', 'warning'); return; }
+    const cuentaOrigen = document.getElementById('cuentaOrigenExt').value;
+    const monto = parseFloat(document.getElementById('montoExterno').value);
+    const concepto = document.getElementById('conceptoExterno').value.trim();
+
+    errExterno.classList.add('hidden');
+
+    if (isNaN(monto) || monto <= 0) {
+      errExterno.textContent = '⚠ Ingresa un monto válido mayor a 0.';
+      errExterno.classList.remove('hidden'); return;
+    }
+    if (usadoDiario + monto > LIMITE_DIARIO) {
+      errExterno.textContent = `⚠ Superas el límite diario. Disponible: ${formatCurrency(LIMITE_DIARIO - usadoDiario)}`;
+      errExterno.classList.remove('hidden'); return;
+    }
+
+    try {
+      const nombreDestinatario = destinatarioActual.nombreCompleto; // guardar ANTES de limpiar
+      AppState.transferirAOtroUsuario(cuentaOrigen, destinatarioActual.usuario, monto, concepto);
+      usadoDiario += monto;
+      document.getElementById('montoExterno').value = '';
+      document.getElementById('conceptoExterno').value = '';
+      limpiarDestinatario();
+      inputBuscar.value = '';
+      showToast(`✅ Transferencia de ${formatCurrency(monto)} enviada a ${nombreDestinatario}.`, 'success', 4500);
+      actualizarSaldos();
+      actualizarHistorialReciente();
+    } catch(err) {
+      errExterno.textContent = '⚠ ' + err.message;
+      errExterno.classList.remove('hidden');
+    }
+  });
+
+  // ── Tab 3: Consignar ─────────────────────────────────────────
+  document.getElementById('btnConsignar').addEventListener('click', () => {
+    const tipo = document.getElementById('cuentaConsignar').value;
+    const monto = parseFloat(document.getElementById('montoConsignar').value);
+    const errEl = document.getElementById('errorConsignar');
+
+    if (isNaN(monto) || monto <= 0) {
+      errEl.textContent = '⚠ Ingresa un monto válido mayor a 0.';
+      errEl.classList.remove('hidden'); return;
+    }
+    try {
+      const cuenta = tipo === 'ahorros' ? AppState.getCuentaAhorros() : AppState.getCuentaCorriente();
+      cuenta.consignar(monto);
+      AppState.guardar();
+      document.getElementById('montoConsignar').value = '';
+      errEl.classList.add('hidden');
+      showToast(`✅ Consignación de ${formatCurrency(monto)} realizada.`, 'success');
+      actualizarSaldos();
+      actualizarHistorialReciente();
+    } catch(err) {
+      showToast(err.message, 'error');
+    }
+  });
+
+  // ── Init ─────────────────────────────────────────────────────
+  actualizarSaldos();
+  actualizarHistorialReciente();
+</script>
+</body>
+</html>

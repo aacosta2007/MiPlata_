@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Perfil y Seguridad</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .perfil-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    .data-row { padding:14px 0; border-bottom:1px solid var(--gray-100); }
+    .data-row:last-child { border-bottom:none; }
+    .data-key { font-size:.72rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .data-val { font-size:.9rem; color:var(--gray-800); font-weight:500; }
+    .security-level { background:#EFF6FF; border-radius:var(--radius-md); padding:14px 16px; display:flex; align-items:center; gap:12px; margin-top:16px; }
+    .pw-strength { height:4px; background:var(--gray-200); border-radius:99px; margin-top:8px; overflow:hidden; }
+    .pw-strength-fill { height:100%; border-radius:99px; transition:width .3s, background .3s; }
+    .user-id-card { background:var(--gray-50); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:10px 16px; display:flex; align-items:center; gap:10px; }
+    .input-pw-wrapper { position:relative; }
+    .input-pw-wrapper .form-control { padding-right:44px; }
+    .eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; }
+    .step-num { width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--white); font-size:.75rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="topbar">
+      <nav style="display:flex;gap:24px;">
+        <a href="../GestionDeCuentas/GestionDeCuentas.html" style="font-size:.875rem;font-weight:500;color:var(--gray-600);text-decoration:none;">Dashboard</a>
+        <a href="../Transacciones/Transacciones.html" style="font-size:.875rem;font-weight:500;color:var(--gray-600);text-decoration:none;">Transacciones</a>
+        <a href="PerfilSeguridad.html" style="font-size:.875rem;font-weight:700;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:2px;text-decoration:none;">Perfil</a>
+      </nav>
+      <div class="topbar-actions">
+        <div class="topbar-search" style="min-width:200px;">
+          <span>🔍</span><input type="text" placeholder="Buscar..." />
+        </div>
+        <button class="btn-icon">🔔</button>
+        <button class="btn btn-primary btn-sm" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="flex justify-between items-center" style="margin-bottom:28px;">
+        <div>
+          <h1 class="page-title">Perfil y Seguridad</h1>
+          <p class="page-subtitle">Administra tu identidad digital y protege tus activos.</p>
+        </div>
+        <div class="user-id-card">
+          <span style="font-size:1.2rem;">🪪</span>
+          <div>
+            <div style="font-size:.65rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;">USER ID</div>
+            <div style="font-family:var(--font-mono);font-size:.9rem;font-weight:700;color:var(--accent);" id="userId">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="perfil-grid">
+        <!-- Datos personales -->
+        <div>
+          <div class="card">
+            <div class="flex justify-between items-center" style="margin-bottom:16px;">
+              <h3 style="font-size:1rem;font-weight:700;">Datos Personales</h3>
+              <button class="btn btn-secondary btn-sm" id="btnEditar">✏ Editar</button>
+            </div>
+            <div id="vistaData">
+              <div class="data-row"><div class="data-key">NOMBRE COMPLETO</div><div class="data-val" id="dnombre">--</div></div>
+              <div class="data-row"><div class="data-key">CORREO ELECTRÓNICO</div><div class="data-val" id="dcorreo">--</div></div>
+              <div class="data-row"><div class="data-key">TELÉFONO VINCULADO</div><div class="data-val" id="dtelefono">--</div></div>
+              <div class="data-row"><div class="data-key">USUARIO</div><div class="data-val" id="dusuario">--</div></div>
+              <div class="data-row"><div class="data-key">N° CUENTA AHORROS</div><div class="data-val" style="font-family:var(--font-mono);color:var(--accent);" id="dNumAhorros">--</div></div>
+              <div class="data-row"><div class="data-key">N° CUENTA CORRIENTE</div><div class="data-val" style="font-family:var(--font-mono);color:var(--accent);" id="dNumCorriente">--</div></div>
+              <div class="data-row"><div class="data-key">N° TARJETA CRÉDITO</div><div class="data-val" style="font-family:var(--font-mono);color:var(--accent);" id="dNumTarjeta">--</div></div>
+            </div>
+            <div id="formEditar" style="display:none;">
+              <div class="form-group mt-8">
+                <label class="form-label">Nombre completo</label>
+                <input class="form-control" type="text" id="editNombre" />
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label">Teléfono</label>
+                <input class="form-control" type="text" id="editTelefono" />
+              </div>
+              <div class="flex gap-16 mt-24">
+                <button class="btn btn-secondary" id="cancelarEditar">Cancelar</button>
+                <button class="btn btn-primary" id="guardarEditar">Guardar Cambios</button>
+              </div>
+            </div>
+          </div>
+          <div class="security-level">
+            <span style="font-size:1.4rem;">🛡</span>
+            <div>
+              <div style="font-size:.9rem;font-weight:700;color:var(--primary);">Nivel de Seguridad: Alto</div>
+              <div style="font-size:.78rem;color:var(--gray-600);margin-top:2px;">Tu cuenta está protegida por biometría y 2FA.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cambiar contraseña -->
+        <div class="card">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">🔄 Cambiar Contraseña</h3>
+          <p class="text-xs text-muted" style="margin-bottom:20px;">Sigue los pasos para actualizar tu acceso de forma segura.</p>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <span class="step-num">01</span> Validar Contraseña Actual
+              </label>
+              <div class="input-pw-wrapper">
+                <input class="form-control" type="password" id="pwActual" placeholder="••••••••••••" />
+                <button class="eye-btn" data-target="pwActual">👁</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <span class="step-num">02</span> Nueva Contraseña
+              </label>
+              <div class="input-pw-wrapper">
+                <input class="form-control" type="password" id="pwNueva" placeholder="Mínimo 6 caracteres" />
+                <button class="eye-btn" data-target="pwNueva">👁</button>
+              </div>
+              <div style="margin-top:6px;">
+                <div class="flex justify-between">
+                  <span class="text-xs text-muted">FORTALEZA</span>
+                  <span class="text-xs font-bold" id="strengthLabel" style="color:var(--gray-400);">—</span>
+                </div>
+                <div class="pw-strength">
+                  <div class="pw-strength-fill" id="strengthBar" style="width:0%;background:var(--gray-300);"></div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <span class="step-num">03</span> Confirma Nueva Contraseña
+              </label>
+              <div class="input-pw-wrapper">
+                <input class="form-control" type="password" id="pwConfirmar" placeholder="Repite la contraseña exactamente" />
+                <button class="eye-btn" data-target="pwConfirmar">👁</button>
+              </div>
+              <span class="form-error hidden" id="errorPwMatch">⚠ Las contraseñas no coinciden.</span>
+            </div>
+            <button class="btn btn-primary btn-full btn-lg" id="btnActualizar">Actualizar Credenciales</button>
+            <p class="text-xs text-muted" style="text-align:center;">Al actualizar tus credenciales, se cerrarán todas las sesiones activas en otros dispositivos.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="#">PRIVACIDAD</a><a href="#">TÉRMINOS Y CONDICIONES</a><a href="#">SEGURIDAD</a><a href="#">CONTACTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<script type="module">
+import { AppState, showToast, buildSidebar } from '../../assets/app.js';
+try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
+buildSidebar('perfil');
+
+const cliente   = AppState.getClienteActivo();
+const ahorros   = AppState.getCuentaAhorros();
+const corriente = AppState.getCuentaCorriente();
+const tarjeta   = AppState.getTarjetaCredito();
+
+document.getElementById('userId').textContent    = `ID-${String(cliente.id).padStart(6,'0')}`;
+document.getElementById('dnombre').textContent   = cliente.nombreCompleto;
+document.getElementById('dcorreo').textContent   = `${cliente.usuario}@miplata.com`;
+document.getElementById('dtelefono').textContent = cliente.celular;
+document.getElementById('dusuario').textContent  = `@${cliente.usuario}`;
+// Números de cuenta reales
+document.getElementById('dNumAhorros').textContent   = ahorros.numeroCuenta;
+document.getElementById('dNumCorriente').textContent = corriente.numeroCuenta;
+document.getElementById('dNumTarjeta').textContent   = tarjeta.numeroCuenta;
+
+// ── Editar perfil
+const btnEditar   = document.getElementById('btnEditar');
+const vistaData   = document.getElementById('vistaData');
+const formEditar  = document.getElementById('formEditar');
+
+btnEditar.addEventListener('click', () => {
+  document.getElementById('editNombre').value   = cliente.nombreCompleto;
+  document.getElementById('editTelefono').value = cliente.celular;
+  vistaData.style.display = 'none';
+  formEditar.style.display = '';
+  btnEditar.style.display = 'none';
+});
+
+document.getElementById('cancelarEditar').addEventListener('click', () => {
+  vistaData.style.display = '';
+  formEditar.style.display = 'none';
+  btnEditar.style.display = '';
+});
+
+document.getElementById('guardarEditar').addEventListener('click', () => {
+  const nombre   = document.getElementById('editNombre').value.trim();
+  const telefono = document.getElementById('editTelefono').value.trim();
+  if (!nombre) { showToast('El nombre no puede estar vacío.', 'error'); return; }
+  try {
+    cliente.editarPerfil(nombre, telefono);
+    AppState.actualizarPerfil(nombre, telefono);
+    document.getElementById('dnombre').textContent   = cliente.nombreCompleto;
+    document.getElementById('dtelefono').textContent = cliente.celular;
+    vistaData.style.display = '';
+    formEditar.style.display = 'none';
+    btnEditar.style.display = '';
+    showToast('✅ Perfil actualizado correctamente.', 'success');
+  } catch(err) { showToast(err.message, 'error'); }
+});
+
+// ── Toggle ojos
+document.querySelectorAll('.eye-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.target);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🔒';
+  });
+});
+
+// ── Fortaleza de contraseña
+document.getElementById('pwNueva').addEventListener('input', function() {
+  const pw = this.value;
+  let score = 0;
+  if (pw.length >= 6)              score++;
+  if (pw.length >= 10)             score++;
+  if (/[A-Z]/.test(pw))           score++;
+  if (/[0-9]/.test(pw))           score++;
+  if (/[^A-Za-z0-9]/.test(pw))   score++;
+
+  const colorMap = ['#CBD5E1','#DC2626','#F97316','#D97706','#3B82F6','#16A34A'];
+  const labels   = ['—','Muy débil','Débil','Regular','Fuerte','Sólida'];
+  const widths   = ['0%','20%','40%','60%','80%','100%'];
+
+  document.getElementById('strengthBar').style.width      = widths[score];
+  document.getElementById('strengthBar').style.background = colorMap[score];
+  document.getElementById('strengthLabel').textContent    = labels[score];
+  document.getElementById('strengthLabel').style.color    = colorMap[score];
+});
+
+// ── Cambiar contraseña
+document.getElementById('btnActualizar').addEventListener('click', () => {
+  const actual    = document.getElementById('pwActual').value;
+  const nueva     = document.getElementById('pwNueva').value;
+  const confirmar = document.getElementById('pwConfirmar').value;
+  const errorMatch = document.getElementById('errorPwMatch');
+
+  if (!actual || !nueva || !confirmar) {
+    showToast('Por favor completa todos los campos.', 'error');
+    return;
+  }
+  if (nueva !== confirmar) {
+    errorMatch.classList.remove('hidden');
+    document.getElementById('pwConfirmar').classList.add('error');
+    return;
+  }
+  errorMatch.classList.add('hidden');
+  document.getElementById('pwConfirmar').classList.remove('error');
+
+  try {
+    cliente.cambiarContrasena(actual, nueva);
+    AppState.guardar();
+    ['pwActual','pwNueva','pwConfirmar'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('strengthBar').style.width = '0%';
+    document.getElementById('strengthLabel').textContent = '—';
+    showToast('✅ Contraseña actualizada. Otras sesiones han sido cerradas.', 'success', 5000);
+  } catch(err) { showToast(err.message, 'error'); }
+});
+</script>
+</body>
+</html>

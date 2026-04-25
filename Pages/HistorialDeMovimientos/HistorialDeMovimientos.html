@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Historial</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .filter-tabs { display:flex; gap:8px; margin-bottom:24px; }
+    .tab-btn {
+      padding:7px 18px; border-radius:99px; border:1.5px solid var(--gray-200);
+      font-family:var(--font-main); font-size:0.82rem; font-weight:600;
+      cursor:pointer; background:var(--white); color:var(--gray-600); transition:all .15s;
+    }
+    .tab-btn.active { background:var(--accent); color:var(--white); border-color:var(--accent); }
+    .tab-btn:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
+
+    .mov-icon {
+      width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
+    }
+    .mov-tipo { font-size:.875rem; font-weight:600; color:var(--gray-800); }
+    .mov-fecha { font-size:.75rem; color:var(--gray-400); }
+    .mov-valor { font-family:var(--font-mono); font-size:.9rem; font-weight:700; }
+    .mov-saldo { font-family:var(--font-mono); font-size:.82rem; color:var(--gray-500); }
+
+    .load-more-btn {
+      display:flex; align-items:center; gap:8px;
+      background:var(--gray-100); border:none; border-radius:var(--radius-md);
+      padding:10px 20px; margin:16px auto 0; cursor:pointer;
+      font-family:var(--font-main); font-size:.875rem; font-weight:600; color:var(--gray-600);
+    }
+    .load-more-btn:hover { background:var(--gray-200); }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscar en historial..." id="searchInput" />
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon">🔔<span class="badge"></span></button>
+        <button class="btn-logout" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <h1 class="page-title">Historial de Movimientos</h1>
+        <p class="page-subtitle">Consulta el registro detallado de todas tus operaciones financieras. Los datos se presentan en orden descendente.</p>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filter-tabs">
+        <button class="tab-btn active" data-filter="todos">Todas</button>
+        <button class="tab-btn" data-filter="ahorros">Ahorros</button>
+        <button class="tab-btn" data-filter="corriente">Corriente</button>
+        <button class="tab-btn" data-filter="tarjeta">Crédito</button>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card" style="padding:0;">
+        <table class="data-table" id="historialTable">
+          <thead>
+            <tr>
+              <th>FECHA</th>
+              <th>TIPO DE MOVIMIENTO</th>
+              <th>CUENTA</th>
+              <th style="text-align:right;">VALOR</th>
+              <th style="text-align:right;">SALDO RESULTANTE</th>
+            </tr>
+          </thead>
+          <tbody id="historialBody">
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--gray-400);">Cargando...</td></tr>
+          </tbody>
+        </table>
+        <div style="padding:16px;text-align:center;">
+          <button class="load-more-btn" id="loadMoreBtn">Cargar movimientos anteriores ∨</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="#">PRIVACIDAD</a><a href="#">TÉRMINOS Y CONDICIONES</a>
+        <a href="#">SEGURIDAD</a><a href="#" style="font-weight:700;color:var(--accent);">CONTACTO DIRECTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script type="module">
+  import { AppState, formatCurrency, buildSidebar } from '../../assets/app.js';
+  try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
+  buildSidebar('historial');
+
+  const body = document.getElementById('historialBody');
+  const searchInput = document.getElementById('searchInput');
+  let filtroActivo = 'todos';
+  let paginaActual = 1;
+  const POR_PAGINA = 8;
+
+  const iconos = {
+    CONSIGNACION:     { icon:'🏛', color:'#DCFCE7' },
+    RETIRO:           { icon:'💸', color:'#FEE2E2' },
+    TRANSFERENCIA_OUT:{ icon:'↗',  color:'#FEE2E2' },
+    TRANSFERENCIA_IN: { icon:'↙',  color:'#DCFCE7' },
+    COMPRA_TC:        { icon:'🛍', color:'#FEF3C7' },
+    PAGO_TC:          { icon:'✅', color:'#DCFCE7' },
+  };
+
+  function getMovimientos() {
+    let movs = AppState.getTodosMovimientos();
+    if (filtroActivo !== 'todos') {
+      movs = movs.filter(m => m.cuenta?.toLowerCase() === filtroActivo);
+    }
+    const q = searchInput.value.trim().toLowerCase();
+    if (q) {
+      movs = movs.filter(m =>
+        m.descripcion.toLowerCase().includes(q) ||
+        m.tipo.toLowerCase().includes(q)
+      );
+    }
+    return movs;
+  }
+
+  function render() {
+    const movs = getMovimientos();
+    const slice = movs.slice(0, paginaActual * POR_PAGINA);
+
+    if (slice.length === 0) {
+      body.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--gray-400);">Sin movimientos encontrados.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = slice.map(m => {
+      const meta = iconos[m.tipo] || { icon:'💰', color:'#F1F5F9' };
+      const esPos = ['CONSIGNACION','TRANSFERENCIA_IN','PAGO_TC'].includes(m.tipo);
+      const fecha = new Date(m.fechaHora).toLocaleString('es-CO', {
+        day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+      });
+      const tipoLabel = m.tipo.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+      return `
+        <tr>
+          <td class="mov-fecha">${fecha}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="mov-icon" style="background:${meta.color};">${meta.icon}</div>
+              <span class="mov-tipo">${tipoLabel}</span>
+            </div>
+          </td>
+          <td><span class="chip chip-blue">${m.cuenta || '-'}</span></td>
+          <td style="text-align:right;" class="mov-valor ${esPos?'amount-positive':'amount-negative'}">
+            ${esPos?'+':'-'}${formatCurrency(m.valor)}
+          </td>
+          <td style="text-align:right;" class="mov-saldo">${formatCurrency(m.saldoPosterior)}</td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('loadMoreBtn').style.display =
+      slice.length < movs.length ? 'flex' : 'none';
+  }
+
+  // Filtros
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelector('.tab-btn.active').classList.remove('active');
+      btn.classList.add('active');
+      filtroActivo = btn.dataset.filter;
+      paginaActual = 1;
+      render();
+    });
+  });
+
+  // Búsqueda
+  searchInput.addEventListener('input', () => { paginaActual = 1; render(); });
+
+  // Cargar más
+  document.getElementById('loadMoreBtn').addEventListener('click', () => {
+    paginaActual++;
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

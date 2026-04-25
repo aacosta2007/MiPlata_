@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Tarjeta de Crédito</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .sim-grid { display:grid; grid-template-columns:380px 1fr; gap:24px; }
+    .tasa-badge {
+      background:#EFF6FF; border:1px solid #BFDBFE;
+      border-radius:var(--radius-md); padding:6px 14px;
+      font-size:.78rem; font-weight:700; color:#1E40AF;
+      display:inline-flex; align-items:center; gap:6px;
+    }
+    .amort-table th { background:var(--gray-50); }
+    .interes-cell { color:var(--error); font-weight:600; }
+    .cuota-num { font-weight:700; color:var(--gray-500); }
+    .export-link { font-size:.8rem; color:var(--accent); font-weight:700; text-decoration:none; }
+    .export-link:hover { text-decoration:underline; }
+    .sin-interes-note {
+      background:#EFF6FF; border:1px solid #BFDBFE; border-radius:var(--radius-md);
+      padding:14px 16px; margin-top:16px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="topbar">
+      <nav style="display:flex;gap:24px;">
+        <a href="../GestionDeCuentas/GestionDeCuentas.html" style="font-size:.875rem;font-weight:500;color:var(--gray-600);text-decoration:none;">Dashboard</a>
+        <a href="../GestionDeCuentas/GestionDeCuentas.html" style="font-size:.875rem;font-weight:500;color:var(--gray-600);text-decoration:none;">Cuentas</a>
+        <a href="TarjetaCredito.html" style="font-size:.875rem;font-weight:700;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:2px;text-decoration:none;">Tarjeta de Crédito</a>
+      </nav>
+      <div class="topbar-actions">
+        <button class="btn-icon">🔔</button>
+        <button class="btn btn-primary btn-sm" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header flex justify-between items-center">
+        <div>
+          <h1 class="page-title">Simulador de Compras</h1>
+          <p class="page-subtitle">Calcula el impacto de tus compras antes de usar tu tarjeta de crédito. Transparencia absoluta en tasas e intereses.</p>
+        </div>
+        <div class="tasa-badge">ℹ TASA ACTUAL: 1.9% – 2.3% EA</div>
+      </div>
+
+      <div class="sim-grid">
+        <!-- Parámetros -->
+        <div class="card">
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+            📊 Parámetros de Compra
+          </h3>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Monto de la compra</label>
+            <input class="form-control form-control-mono" type="number"
+              id="montoCompra" value="1500000" min="1" />
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label">Número de cuotas</label>
+            <select class="form-control" id="numCuotas">
+              <option value="1">1 Cuota (0%)</option>
+              <option value="2">2 Cuotas (0%)</option>
+              <option value="3">3 Cuotas (1.9%)</option>
+              <option value="4">4 Cuotas (1.9%)</option>
+              <option value="5">5 Cuotas (1.9%)</option>
+              <option value="6" selected>6 Cuotas (1.9%)</option>
+              <option value="7">7 Cuotas (2.3%)</option>
+              <option value="12">12 Cuotas (2.3%)</option>
+              <option value="24">24 Cuotas (2.3%)</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary btn-full" id="btnSimular">
+            📊 SIMULAR COMPRA
+          </button>
+
+          <div class="sin-interes-note">
+            <div style="font-size:.9rem;font-weight:700;color:var(--primary);">Sin intereses hasta 2 cuotas</div>
+            <div style="font-size:.8rem;color:var(--gray-600);margin-top:4px;line-height:1.5;">
+              Aprovecha nuestras alianzas comerciales y difiere tus compras sin costo adicional.
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultado + Tabla -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Resumen -->
+          <div class="card" id="resumenCard" style="display:none;">
+            <div class="grid-2" style="margin-bottom:20px;">
+              <div>
+                <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.5px;">CUOTA MENSUAL ESTIMADA</div>
+                <div style="font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--gray-900);margin-top:4px;" id="cuotaResult">$0</div>
+                <div style="display:flex;gap:12px;margin-top:8px;">
+                  <span class="chip chip-gray" id="tasaChip">% Tasa: 0%</span>
+                  <span class="chip chip-blue" id="plazoChip">⏱ Plazo: 1 mes</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.5px;">TOTAL A PAGAR</div>
+                <div style="font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--gray-900);margin-top:4px;" id="totalResult">$0</div>
+                <div class="text-xs text-muted" style="margin-top:4px;" id="interesTotal">Intereses totales: $0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla amortización -->
+          <div class="card" id="tablaCard" style="display:none;padding:0;">
+            <div class="flex justify-between items-center" style="padding:16px 20px 0;">
+              <span style="font-size:.95rem;font-weight:700;">Tabla de Amortización</span>
+              <a href="#" class="export-link" id="exportBtn">⬇ Exportar PDF</a>
+            </div>
+            <table class="data-table amort-table" style="margin-top:8px;">
+              <thead>
+                <tr>
+                  <th>CUOTA</th>
+                  <th style="text-align:right;">CUOTA MENSUAL</th>
+                  <th style="text-align:right;">CAPITAL</th>
+                  <th style="text-align:right;">INTERÉS</th>
+                  <th style="text-align:right;">SALDO</th>
+                </tr>
+              </thead>
+              <tbody id="tablaBody"></tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <div>
+        <div style="font-size:.9rem;font-weight:700;color:var(--accent);">Mi Plata</div>
+        <div class="text-xs text-muted">Soluciones financieras de alta gama para el usuario moderno.</div>
+      </div>
+      <div class="footer-links"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Seguridad</a><a href="#">Contacto</a></div>
+      <span class="text-xs text-muted">© 2024 Mi Plata S.A.</span>
+    </footer>
+  </div>
+</div>
+
+<script type="module">
+  import { AppState, formatCurrency, showToast, buildSidebar } from '../../assets/app.js';
+  try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
+  buildSidebar('tarjeta');
+
+  const tc = AppState.getTarjetaCredito();
+
+  document.getElementById('btnSimular').addEventListener('click', () => {
+    const monto  = parseFloat(String(document.getElementById('montoCompra').value).trim().replace(',','.'));
+    const cuotas = parseInt(document.getElementById('numCuotas').value);
+
+    if (isNaN(monto) || monto <= 0) { showToast('Ingresa un monto válido mayor a 0.', 'error'); return; }
+
+    const tasa        = tc.calcularTasa(cuotas);
+    const cuotaMensual= tc.calcularCuotaMensual(monto, cuotas);
+    const tabla       = tc.generarTablaAmortizacion(monto, cuotas);
+    const totalPagar  = parseFloat((cuotaMensual * cuotas).toFixed(2));
+    const totalInteres= parseFloat((totalPagar - monto).toFixed(2));
+
+    // Resumen
+    document.getElementById('cuotaResult').textContent = formatCurrency(cuotaMensual);
+    document.getElementById('totalResult').textContent = formatCurrency(totalPagar);
+    document.getElementById('interesTotal').textContent= `Intereses totales: ${formatCurrency(Math.max(totalInteres,0))}`;
+    document.getElementById('tasaChip').textContent    = `% Tasa: ${(tasa*100).toFixed(1)}%`;
+    document.getElementById('plazoChip').textContent   = `⏱ Plazo: ${cuotas} meses`;
+
+    document.getElementById('resumenCard').style.display = '';
+    document.getElementById('tablaCard').style.display   = '';
+
+    // Tabla
+    document.getElementById('tablaBody').innerHTML = tabla.map(row => `
+      <tr>
+        <td class="cuota-num">${String(row.cuota).padStart(2,'0')}</td>
+        <td style="text-align:right;">${formatCurrency(row.cuotaMensual)}</td>
+        <td style="text-align:right;">${formatCurrency(row.capital)}</td>
+        <td style="text-align:right;" class="interes-cell">$${row.interes.toLocaleString()}</td>
+        <td style="text-align:right;">${formatCurrency(row.saldo)}</td>
+      </tr>
+    `).join('');
+  });
+
+  // Simular al cargar
+  document.getElementById('btnSimular').click();
+
+  document.getElementById('exportBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('Exportación PDF no disponible en modo demo.', 'warning');
+  });
+</script>
+</body>
+</html>

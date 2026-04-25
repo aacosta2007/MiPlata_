@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Redirigiendo...</title>
+  <style>
+    body { margin:0; display:flex; align-items:center; justify-content:center;
+           min-height:100vh; background:#F8FAFC; font-family:'DM Sans',sans-serif; }
+    .loader { text-align:center; }
+    .brand { font-size:2rem; font-weight:700; color:#1A3A6B; letter-spacing:-1px; }
+    .sub { font-size:.85rem; color:#94A3B8; margin-top:6px; }
+    .spinner { width:32px; height:32px; border:3px solid #E2E8F0;
+               border-top-color:#2563EB; border-radius:50%;
+               animation:spin .7s linear infinite; margin:20px auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="brand">Mi Plata</div>
+    <div class="spinner"></div>
+    <div class="sub">Verificando sesión...</div>
+  </div>
+  <script type="module">
+    // Redirect based on session
+    const session = localStorage.getItem('miplata_session');
+    if (session) {
+      window.location.replace('../GestionDeCuentas/GestionDeCuentas.html');
+    } else {
+      window.location.replace('../iniciarSesion/iniciarSesion.html');
+    }
+  </script>
+</body>
+</html>
