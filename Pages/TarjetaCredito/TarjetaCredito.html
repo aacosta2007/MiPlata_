@@ -165,7 +165,6 @@
     const totalPagar  = parseFloat((cuotaMensual * cuotas).toFixed(2));
     const totalInteres= parseFloat((totalPagar - monto).toFixed(2));
 
-    // Resumen
     document.getElementById('cuotaResult').textContent = formatCurrency(cuotaMensual);
     document.getElementById('totalResult').textContent = formatCurrency(totalPagar);
     document.getElementById('interesTotal').textContent= `Intereses totales: ${formatCurrency(Math.max(totalInteres,0))}`;
@@ -175,7 +174,6 @@
     document.getElementById('resumenCard').style.display = '';
     document.getElementById('tablaCard').style.display   = '';
 
-    // Tabla
     document.getElementById('tablaBody').innerHTML = tabla.map(row => `
       <tr>
         <td class="cuota-num">${String(row.cuota).padStart(2,'0')}</td>
@@ -187,7 +185,6 @@
     `).join('');
   });
 
-  // Simular al cargar
   document.getElementById('btnSimular').click();
 
   document.getElementById('exportBtn').addEventListener('click', (e) => {
