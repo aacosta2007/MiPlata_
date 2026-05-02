@@ -473,7 +473,7 @@
     }
 
     try {
-      const nombreDestinatario = destinatarioActual.nombreCompleto; // guardar ANTES de limpiar
+      const nombreDestinatario = destinatarioActual.nombreCompleto; 
       AppState.transferirAOtroUsuario(cuentaOrigen, destinatarioActual.usuario, monto, concepto);
       usadoDiario += monto;
       document.getElementById('montoExterno').value = '';
