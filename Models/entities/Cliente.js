@@ -9,7 +9,8 @@ export class Cliente extends IAutenticable {
     usuario,
     contrasena,
     intentosFallidos = 0,
-    bloqueado = false
+    bloqueado = false,
+    correo = ''
   ) {
     super();
     this.id = id;
@@ -20,6 +21,7 @@ export class Cliente extends IAutenticable {
     this.contrasena = contrasena;
     this.intentosFallidos = intentosFallidos;
     this.bloqueado = bloqueado;
+    this.correo = correo;
   }
 
   autenticar(usuario, contrasena) {
@@ -61,12 +63,15 @@ export class Cliente extends IAutenticable {
     this.bloqueado = false;
   }
 
-  editarPerfil(nombreCompleto, celular) {
+  editarPerfil(nombreCompleto, celular, correo) {
     if (!nombreCompleto || nombreCompleto.trim() === "") {
       throw new Error("El nombre no puede estar vacío.");
     }
     this.nombreCompleto = nombreCompleto.trim();
     this.celular = celular;
+    if (correo !== undefined) {
+      this.correo = correo;
+    }
   }
 
   intentosRestantes() {

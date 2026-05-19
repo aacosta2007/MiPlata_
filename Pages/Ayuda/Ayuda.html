@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Centro de Ayuda</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .ayuda-hero {
+      background: linear-gradient(135deg, #1A3A6B, #2563EB);
+      color: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .ayuda-hero h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .ayuda-hero p { opacity: .85; font-size: 1rem; }
+
+    .ayuda-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .ayuda-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--gray-100);
+      transition: all .2s;
+    }
+    .ayuda-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .ayuda-card-icon { font-size: 2rem; margin-bottom: 12px; }
+    .ayuda-card-title { font-size: 1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+    .ayuda-card-desc { font-size: .85rem; color: var(--gray-500); line-height: 1.5; }
+
+    .faq-section { margin-top: 24px; }
+    .faq-title {
+      font-size: 1.1rem; font-weight: 700; color: var(--gray-800);
+      margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+    }
+    .faq-item {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%;
+      padding: 16px 20px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-main);
+    }
+    .faq-question:hover { background: var(--gray-50); }
+    .faq-question .arrow { transition: transform .2s; font-size: .8rem; color: var(--accent); }
+    .faq-item.open .faq-question .arrow { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease, padding .3s ease;
+      padding: 0 20px;
+      color: var(--gray-600);
+      font-size: .88rem;
+      line-height: 1.6;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 500px;
+      padding: 0 20px 16px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div></div>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notificaciones">🔔<span class="badge"></span></button>
+        <button class="btn-logout" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="ayuda-hero">
+        <h1>👋 ¿En qué podemos ayudarte?</h1>
+        <p>Encuentra respuestas a las preguntas más frecuentes, aprende cómo usar la plataforma y contacta con soporte si lo necesitas.</p>
+      </div>
+
+      <!-- Accesos rápidos -->
+      <div class="ayuda-grid">
+        <div class="ayuda-card">
+          <div class="ayuda-card-icon">💳</div>
+          <div class="ayuda-card-title">Cómo usar tu tarjeta</div>
+          <div class="ayuda-card-desc">Aprende a hacer compras a crédito, pagar cuotas y consultar tu cupo disponible.</div>
+        </div>
+        <div class="ayuda-card">
+          <div class="ayuda-card-icon">↔</div>
+          <div class="ayuda-card-title">Transferencias</div>
+          <div class="ayuda-card-desc">Envía dinero entre tus cuentas o a otros usuarios de Mi Plata de forma segura.</div>
+        </div>
+        <div class="ayuda-card">
+          <div class="ayuda-card-icon">📊</div>
+          <div class="ayuda-card-title">Extractos PDF</div>
+          <div class="ayuda-card-desc">Descarga tus movimientos mensuales en PDF desde cualquier cuenta o desde el historial.</div>
+        </div>
+        <div class="ayuda-card">
+          <div class="ayuda-card-icon">🔒</div>
+          <div class="ayuda-card-title">Seguridad</div>
+          <div class="ayuda-card-desc">Cambia tu contraseña, revisa tus sesiones y mantén tu cuenta segura.</div>
+        </div>
+        <div class="ayuda-card">
+          <div class="ayuda-card-icon">👤</div>
+          <div class="ayuda-card-title">Tu perfil</div>
+          <div class="ayuda-card-desc">Actualiza tu información personal, teléfono y correo electrónico.</div>
+        </div>
+        <div class="ayuda-card">
+          <div class="ayuda-card-icon">📞</div>
+          <div class="ayuda-card-title">Contacto</div>
+          <div class="ayuda-card-desc">¿No encuentras lo que buscas? Comunícate con nuestro equipo de soporte.</div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="faq-section">
+        <div class="faq-title">❓ Preguntas Frecuentes</div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Cómo cambio mi contraseña? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Ve a la sección <strong>Perfil</strong> en el menú lateral. En la parte inferior encontrarás el formulario "Cambiar Contraseña" donde debes ingresar tu contraseña actual, la nueva (mínimo 6 caracteres) y confirmarla. Haz clic en "Guardar Cambios".
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Cómo hago una transferencia a otro usuario? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Ve a <strong>Transacciones</strong> y selecciona la pestaña "A Otro Usuario". Busca al destinatario por su usuario o número de cuenta, selecciona la cuenta de origen, ingresa el monto y un concepto opcional. El destinatario recibirá el dinero en su cuenta de Ahorros.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Cuál es el límite diario de transferencias? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            El límite diario es de <strong>$5.000.000</strong>. La ventana de 24 horas comienza con tu primera transferencia del día. Puedes ver tu cupo restante y el tiempo hasta el próximo reset en la página de Transacciones.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Qué tasas de interés cobra la Tarjeta de Crédito? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            La tasa depende del plazo seleccionado:
+            <ul style="margin-top:8px;line-height:1.8;">
+              <li><strong>1 a 2 cuotas:</strong> 0% (sin interés)</li>
+              <li><strong>3 a 6 cuotas:</strong> 1.9% mensual</li>
+              <li><strong>7 o más cuotas:</strong> 2.3% mensual</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Cómo pago una cuota de mi tarjeta? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Ve a <strong>Tarjeta de Crédito</strong>. En la sección "Mis Compras a Crédito" verás cada compra con dos opciones: <strong>"💰 Pagar Cuota"</strong> (paga solo la cuota actual) o <strong>"⚡ Pagar Total"</strong> (liquida toda la compra). Antes de pagar, selecciona desde qué cuenta (Ahorros o Corriente) quieres descontar el pago.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Cómo descargo mi extracto mensual? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Tienes varias opciones:
+            <ul style="margin-top:8px;line-height:1.8;">
+              <li>En el <strong>Dashboard</strong>: haz clic en "⬇ Extracto" dentro de cada card de cuenta.</li>
+              <li>En <strong>Tarjeta de Crédito</strong>: botón "⬇ Descargar Extracto" arriba a la derecha.</li>
+              <li>En <strong>Historial</strong>: selecciona mes/año y haz clic en "⬇ Exportar PDF".</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Qué pasa si me equivoco al iniciar sesión muchas veces? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Por seguridad, después de <strong>3 intentos fallidos</strong> tu cuenta se bloqueará temporalmente. Comunícate con soporte para desbloquearla. Te recomendamos usar la opción "Mostrar contraseña" para verificar lo que escribes.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Qué es el sobregiro de la cuenta corriente? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Tu cuenta corriente te permite gastar hasta el <strong>20% adicional</strong> de tu saldo positivo. Por ejemplo, si tienes $1.000.000, puedes retirar o transferir hasta $1.200.000. El límite de sobregiro se ve en el Dashboard con una barra de progreso.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Mis datos están seguros? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            Sí. Toda la información se almacena cifrada en tu navegador. No compartimos tus datos con terceros. Para más detalles consulta nuestra <a href="../Privacidad/Privacidad.html" style="color:var(--accent);font-weight:600;">Política de Privacidad</a> y la sección <a href="../Seguridad/Seguridad.html" style="color:var(--accent);font-weight:600;">Seguridad</a>.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">¿Cómo cierro mi sesión? <span class="arrow">▼</span></button>
+          <div class="faq-answer">
+            En la esquina superior derecha de cualquier página verás el botón "Cerrar Sesión". También puedes hacerlo desde el menú lateral. Por seguridad, cierra sesión siempre que uses un dispositivo compartido.
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Contacto -->
+      <div class="card mt-24" style="text-align:center;padding:32px;">
+        <div style="font-size:2rem;margin-bottom:8px;">📨</div>
+        <h3 style="font-size:1.1rem;margin-bottom:6px;color:var(--gray-800);">¿Aún tienes dudas?</h3>
+        <p class="text-muted text-sm" style="margin-bottom:16px;">Nuestro equipo de soporte está listo para ayudarte.</p>
+        <a href="../Contacto/Contacto.html" class="btn btn-primary">Contactar Soporte →</a>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html">CONTACTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script type="module">
+  import { AppState, buildSidebar } from '../../assets/app.js';
+  try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
+  buildSidebar('ayuda');
+
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.parentElement.classList.toggle('open');
+    });
+  });
+</script>
+</body>
+</html>

@@ -40,7 +40,7 @@
     <header class="topbar">
       <div class="topbar-search">
         <span>🔍</span>
-        <input type="text" placeholder="Buscar en historial..." id="searchInput" />
+        <input type="text" placeholder="Buscar por descripción, tipo o fecha (15/06/2026, 06/2026, 2026)..." id="searchInput" />
       </div>
       <div class="topbar-actions">
         <button class="btn-icon">🔔<span class="badge"></span></button>
@@ -54,13 +54,23 @@
         <p class="page-subtitle">Consulta el registro detallado de todas tus operaciones financieras. Los datos se presentan en orden descendente.</p>
       </div>
 
-      <!-- Filtros -->
-      <div class="filter-tabs">
-        <button class="tab-btn active" data-filter="todos">Todas</button>
-        <button class="tab-btn" data-filter="ahorros">Ahorros</button>
-        <button class="tab-btn" data-filter="corriente">Corriente</button>
-        <button class="tab-btn" data-filter="tarjeta">Crédito</button>
+      <!-- Filtros + Exportar -->
+      <div class="flex justify-between items-center" style="margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div class="filter-tabs" style="margin-bottom:0;">
+          <button class="tab-btn active" data-filter="todos">Todas</button>
+          <button class="tab-btn" data-filter="ahorros">Ahorros</button>
+          <button class="tab-btn" data-filter="corriente">Corriente</button>
+          <button class="tab-btn" data-filter="tarjeta">Crédito</button>
+        </div>
+        <div class="flex items-center gap-8">
+          <select id="mesSelector" class="form-control" style="padding:6px 10px;font-size:.82rem;width:auto;"></select>
+          <select id="añoSelector" class="form-control" style="padding:6px 10px;font-size:.82rem;width:auto;"></select>
+          <button class="btn btn-secondary btn-sm" id="exportPdfBtn" title="Descargar extracto del período seleccionado">⬇ Exportar PDF</button>
+        </div>
       </div>
+
+      <!-- Indicador del filtro de búsqueda activo -->
+      <div id="searchHint" style="display:none;font-size:.78rem;color:var(--gray-600);background:var(--gray-100);padding:8px 14px;border-radius:var(--radius-md);margin-bottom:12px;font-weight:600;"></div>
 
       <!-- Tabla -->
       <div class="card" style="padding:0;">
@@ -87,14 +97,17 @@
     <footer class="page-footer">
       <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
       <div class="footer-links">
-        <a href="#">PRIVACIDAD</a><a href="#">TÉRMINOS Y CONDICIONES</a>
-        <a href="#">SEGURIDAD</a><a href="#" style="font-weight:700;color:var(--accent);">CONTACTO DIRECTO</a>
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html" style="font-weight:700;color:var(--accent);">CONTACTO DIRECTO</a>
       </div>
     </footer>
   </div>
 </div>
 <script type="module">
-  import { AppState, formatCurrency, buildSidebar } from '../../assets/app.js';
+  import { AppState, formatCurrency, buildSidebar, showToast,
+           generarPDFExtractoSimple, generarPDFTarjetaCredito } from '../../assets/app.js';
   try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
   buildSidebar('historial');
 
@@ -113,6 +126,78 @@
     PAGO_TC:          { icon:'✅', color:'#DCFCE7' },
   };
 
+  /**
+   * Intenta interpretar el query como una fecha o componente de fecha.
+   * Devuelve `null` si no coincide con ningún patrón, o un objeto:
+   *   { day?: 1..31, month?: 1..12, year?: 4 dígitos }
+   * con los campos que se hayan encontrado.
+   */
+  function parsearFiltroFecha(q) {
+    const nombresMes = {
+      'enero':1, 'febrero':2, 'marzo':3, 'abril':4, 'mayo':5, 'junio':6,
+      'julio':7, 'agosto':8, 'septiembre':9, 'setiembre':9, 'octubre':10,
+      'noviembre':11, 'diciembre':12,
+      'ene':1, 'feb':2, 'mar':3, 'abr':4, 'may':5, 'jun':6,
+      'jul':7, 'ago':8, 'sep':9, 'oct':10, 'nov':11, 'dic':12,
+    };
+    const limpio = q.trim().toLowerCase();
+    if (!limpio) return null;
+
+    // Nombre de mes solo, opcionalmente con año (ej: "junio", "jun 2026", "junio 2026")
+    const matchMes = limpio.match(/^([a-zñ]+)(?:\s+(\d{4}))?$/);
+    if (matchMes && nombresMes[matchMes[1]]) {
+      return {
+        month: nombresMes[matchMes[1]],
+        year: matchMes[2] ? parseInt(matchMes[2]) : undefined,
+      };
+    }
+
+    // Formato ISO: yyyy-mm-dd, yyyy-mm, yyyy
+    const matchISO = limpio.match(/^(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/);
+    if (matchISO) {
+      return {
+        year:  parseInt(matchISO[1]),
+        month: matchISO[2] ? parseInt(matchISO[2]) : undefined,
+        day:   matchISO[3] ? parseInt(matchISO[3]) : undefined,
+      };
+    }
+
+    // Formato latino: dd/mm/yyyy, dd/mm, mm/yyyy (acepta - o /)
+    const matchLat = limpio.match(/^(\d{1,4})[\/\-](\d{1,4})(?:[\/\-](\d{1,4}))?$/);
+    if (matchLat) {
+      const a = parseInt(matchLat[1]);
+      const b = parseInt(matchLat[2]);
+      const c = matchLat[3] ? parseInt(matchLat[3]) : undefined;
+
+      // 3 partes: dd/mm/yyyy
+      if (c !== undefined) {
+        if (a >= 1 && a <= 31 && b >= 1 && b <= 12 && c >= 1000) {
+          return { day: a, month: b, year: c };
+        }
+        return null;
+      }
+      // 2 partes: mm/yyyy si el segundo es año, sino dd/mm
+      if (b >= 1000) {
+        if (a >= 1 && a <= 12) return { month: a, year: b };
+        return null;
+      }
+      if (a >= 1 && a <= 31 && b >= 1 && b <= 12) {
+        return { day: a, month: b };
+      }
+      return null;
+    }
+
+    return null;
+  }
+
+  function coincideFecha(movFecha, filtro) {
+    const f = new Date(movFecha);
+    if (filtro.year !== undefined && f.getFullYear() !== filtro.year) return false;
+    if (filtro.month !== undefined && (f.getMonth() + 1) !== filtro.month) return false;
+    if (filtro.day !== undefined && f.getDate() !== filtro.day) return false;
+    return true;
+  }
+
   function getMovimientos() {
     let movs = AppState.getTodosMovimientos();
     if (filtroActivo !== 'todos') {
@@ -120,10 +205,22 @@
     }
     const q = searchInput.value.trim().toLowerCase();
     if (q) {
-      movs = movs.filter(m =>
-        m.descripcion.toLowerCase().includes(q) ||
-        m.tipo.toLowerCase().includes(q)
-      );
+      const filtroFecha = parsearFiltroFecha(q);
+      if (filtroFecha) {
+        // Filtro por fecha
+        movs = movs.filter(m => coincideFecha(m.fechaHora, filtroFecha));
+      } else {
+        // Filtro por texto (descripción, tipo, cuenta, o fecha formateada)
+        movs = movs.filter(m => {
+          const fechaFmt = new Date(m.fechaHora).toLocaleDateString('es-CO');
+          return (
+            m.descripcion.toLowerCase().includes(q) ||
+            m.tipo.toLowerCase().includes(q) ||
+            (m.cuenta || '').toLowerCase().includes(q) ||
+            fechaFmt.includes(q)
+          );
+        });
+      }
     }
     return movs;
   }
@@ -132,6 +229,26 @@
     const movs = getMovimientos();
     const slice = movs.slice(0, paginaActual * POR_PAGINA);
 
+    // Indicador visual: si el query es una fecha válida, muestra chip informativo
+    const q = searchInput.value.trim();
+    const filtroFecha = q ? parsearFiltroFecha(q.toLowerCase()) : null;
+    const hint = document.getElementById('searchHint');
+    if (hint) {
+      if (filtroFecha) {
+        const partes = [];
+        if (filtroFecha.day)   partes.push(String(filtroFecha.day).padStart(2,'0'));
+        if (filtroFecha.month) partes.push(String(filtroFecha.month).padStart(2,'0'));
+        if (filtroFecha.year)  partes.push(filtroFecha.year);
+        hint.textContent = `📅 Filtrando por fecha: ${partes.join('/')} — ${movs.length} resultado${movs.length === 1 ? '' : 's'}`;
+        hint.style.display = '';
+      } else if (q) {
+        hint.textContent = `🔍 Filtrando por texto: "${q}" — ${movs.length} resultado${movs.length === 1 ? '' : 's'}`;
+        hint.style.display = '';
+      } else {
+        hint.style.display = 'none';
+      }
+    }
+
     if (slice.length === 0) {
       body.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--gray-400);">Sin movimientos encontrados.</td></tr>`;
       return;
@@ -139,7 +256,8 @@
 
     body.innerHTML = slice.map(m => {
       const meta = iconos[m.tipo] || { icon:'💰', color:'#F1F5F9' };
-      const esPos = ['CONSIGNACION','TRANSFERENCIA_IN','PAGO_TC'].includes(m.tipo);
+      const esPagoTCenTarjeta = m.tipo === 'PAGO_TC' && m.cuenta === 'Tarjeta';
+      const esPos = ['CONSIGNACION','TRANSFERENCIA_IN'].includes(m.tipo) || esPagoTCenTarjeta;
       const fecha = new Date(m.fechaHora).toLocaleString('es-CO', {
         day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
       });
@@ -183,6 +301,55 @@
   document.getElementById('loadMoreBtn').addEventListener('click', () => {
     paginaActual++;
     render();
+  });
+
+  /* ─── Selector de mes/año + Exportar PDF ─────────────────────────── */
+  const mesSelector = document.getElementById('mesSelector');
+  const añoSelector = document.getElementById('añoSelector');
+  const exportPdfBtn = document.getElementById('exportPdfBtn');
+
+  const nombresMes = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const hoy = new Date();
+  const mesActual = hoy.getMonth() + 1;
+  const añoActual = hoy.getFullYear();
+
+  // Poblar mes
+  nombresMes.forEach((nom, i) => {
+    const opt = document.createElement('option');
+    opt.value = i + 1;
+    opt.textContent = nom;
+    if (i + 1 === mesActual) opt.selected = true;
+    mesSelector.appendChild(opt);
+  });
+
+  // Poblar año (3 años hacia atrás + actual)
+  for (let a = añoActual; a >= añoActual - 3; a--) {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = a;
+    if (a === añoActual) opt.selected = true;
+    añoSelector.appendChild(opt);
+  }
+
+  exportPdfBtn.addEventListener('click', async () => {
+    const mes = parseInt(mesSelector.value);
+    const año = parseInt(añoSelector.value);
+
+    // Si hay un filtro de cuenta activo, descarga solo esa cuenta.
+    // Si "todos" está activo, descarga las 3 cuentas.
+    if (filtroActivo === 'todos') {
+      showToast('Generando los 3 extractos del período...', 'success', 2000);
+      await generarPDFExtractoSimple('ahorros', mes, año);
+      await generarPDFExtractoSimple('corriente', mes, año);
+      await generarPDFTarjetaCredito(mes, año);
+    } else if (filtroActivo === 'tarjeta') {
+      showToast('Generando extracto de Tarjeta...', 'success', 1500);
+      await generarPDFTarjetaCredito(mes, año);
+    } else {
+      showToast(`Generando extracto de ${filtroActivo}...`, 'success', 1500);
+      await generarPDFExtractoSimple(filtroActivo, mes, año);
+    }
   });
 
   render();

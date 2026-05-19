@@ -126,6 +126,7 @@
             <button class="tab active" data-tab="propia">↔ Entre Mis Cuentas</button>
             <button class="tab"        data-tab="externa">🌐 A Otro Usuario</button>
             <button class="tab"        data-tab="consignar">⬇ Consignar</button>
+            <button class="tab"        data-tab="retirar">⬆ Retirar</button>
           </div>
 
           <!-- ── TAB 1: Transferencia entre propias ── -->
@@ -243,6 +244,28 @@
             <button class="btn btn-primary btn-full" id="btnConsignar">⬇ Consignar</button>
           </div>
 
+          <!-- ── TAB 4: Retirar ── -->
+          <div class="tab-panel" id="panel-retirar">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Cuenta Origen</label>
+              <select class="form-control" id="cuentaRetirarT">
+                <option value="ahorros"   id="retOptAhorros">Ahorros •••• ----</option>
+                <option value="corriente" id="retOptCorriente">Corriente •••• ----</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Monto a retirar</label>
+              <input class="form-control form-control-mono" type="number"
+                id="montoRetirarT" placeholder="$ 0.00" min="1" />
+              <div id="errorRetirarT" class="form-error hidden">⚠ Ingresa un monto válido.</div>
+            </div>
+            <div class="alert alert-info" style="margin-bottom:24px; font-size:.78rem;">
+              <span>ℹ</span>
+              <span id="infoRetirarT">Cuentas de Ahorros cobran 1.5% de interés sobre el retiro.</span>
+            </div>
+            <button class="btn btn-primary btn-full" id="btnRetirarT">⬆ Retirar Efectivo</button>
+          </div>
+
         </div>
 
         <!-- Panel lateral -->
@@ -259,7 +282,7 @@
               <div class="cupo-bar">
                 <div class="cupo-fill" id="cupoFill" style="width:0%"></div>
               </div>
-              <div class="text-xs text-muted" style="margin-top:6px;">Límite diario: $5,000,000. Se restablece en 14 horas.</div>
+              <div class="text-xs text-muted" style="margin-top:6px;">Límite diario: $5,000,000. <span id="cupoReset">Se restablece en —.</span></div>
             </div>
           </div>
 
@@ -294,7 +317,10 @@
     <footer class="page-footer">
       <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
       <div class="footer-links">
-        <a href="#">PRIVACIDAD</a><a href="#">TÉRMINOS</a><a href="#">SEGURIDAD</a>
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html">CONTACTO</a>
       </div>
     </footer>
   </div>
@@ -306,8 +332,40 @@
   buildSidebar('transacc');
 
   const LIMITE_DIARIO = 5000000;
-  let usadoDiario = 0;
+  let usadoDiario = AppState.getCupoDiario().usado;
   let destinatarioActual = null;
+
+  // Formatea el tiempo restante hasta el reset del cupo
+  function formatearReset(ms) {
+    if (!ms || ms <= 0) return 'Se restablece pronto.';
+    const totalMin = Math.floor(ms / 60000);
+    const horas    = Math.floor(totalMin / 60);
+    const minutos  = totalMin % 60;
+    if (horas >= 1) {
+      return `Se restablece en ${horas} h ${minutos.toString().padStart(2,'0')} min.`;
+    }
+    return `Se restablece en ${minutos} min.`;
+  }
+
+  function actualizarTextoReset() {
+    const estado = AppState.getCupoDiario();
+    const el = document.getElementById('cupoReset');
+    if (!el) return;
+    if (estado.usado === 0) {
+      el.textContent = 'Ventana de 24 h aún no iniciada.';
+    } else {
+      el.textContent = formatearReset(estado.resetEnMs);
+    }
+  }
+  // Actualiza el countdown cada minuto y refresca el cupo (por si se resetea automáticamente)
+  setInterval(() => {
+    const estado = AppState.getCupoDiario();
+    if (estado.usado !== usadoDiario) {
+      usadoDiario = estado.usado;
+      actualizarSaldos();
+    }
+    actualizarTextoReset();
+  }, 60000);
 
   const saldoTotal      = document.getElementById('saldoTotal');
   const saldoAhorros    = document.getElementById('saldoAhorros');
@@ -340,11 +398,36 @@
     document.getElementById('extOptCorriente').textContent = `Corriente ${maskAccount(co.numeroCuenta)} — ${formatCurrency(co.saldo)}`;
     document.getElementById('consOptAhorros').textContent  = `Ahorros ${maskAccount(ah.numeroCuenta)}`;
     document.getElementById('consOptCorriente').textContent= `Corriente ${maskAccount(co.numeroCuenta)}`;
+    document.getElementById('retOptAhorros').textContent   = `Ahorros ${maskAccount(ah.numeroCuenta)} — ${formatCurrency(ah.saldo)}`;
+    document.getElementById('retOptCorriente').textContent = `Corriente ${maskAccount(co.numeroCuenta)} — ${formatCurrency(co.saldo)}`;
 
     const pct = Math.min((usadoDiario / LIMITE_DIARIO) * 100, 100);
     document.getElementById('cupoUsado').textContent = `Utilizado: ${formatCurrency(usadoDiario)}`;
     document.getElementById('cupoPorc').textContent  = `${Math.round(pct)}%`;
     document.getElementById('cupoFill').style.width  = `${pct}%`;
+    actualizarTextoReset();
+
+    // Deshabilita botones de transferir si se alcanzó el límite diario
+    const cupoAgotado = usadoDiario >= LIMITE_DIARIO;
+    const btnPropia  = document.getElementById('btnTransferirPropia');
+    const btnExterno = document.getElementById('btnTransferirExterno');
+    if (btnPropia)  {
+      btnPropia.disabled = cupoAgotado;
+      btnPropia.title = cupoAgotado ? 'Límite diario de transferencias alcanzado' : '';
+    }
+    if (btnExterno) {
+      // El externo ya estaba deshabilitado por falta de destinatario; respetar eso.
+      if (cupoAgotado) {
+        btnExterno.disabled = true;
+        btnExterno.title = 'Límite diario de transferencias alcanzado';
+      } else if (!destinatarioActual) {
+        btnExterno.disabled = true;
+        btnExterno.title = '';
+      } else {
+        btnExterno.disabled = false;
+        btnExterno.title = '';
+      }
+    }
   }
 
   function actualizarHistorialReciente() {
@@ -356,7 +439,8 @@
     }
     const tipoOut = ['RETIRO','TRANSFERENCIA_OUT'];
     cont.innerHTML = movs.map(m => {
-      const esOut = tipoOut.includes(m.tipo);
+      const esPagoTCenCuenta = m.tipo === 'PAGO_TC' && m.cuenta !== 'Tarjeta';
+      const esOut = tipoOut.includes(m.tipo) || esPagoTCenCuenta;
       const icon  = esOut ? '↑' : '↓';
       return `
         <div class="mov-row">
@@ -392,12 +476,23 @@
       errEl.textContent = '⚠ Ingresa un monto válido mayor a 0.';
       errEl.classList.remove('hidden'); return;
     }
+    // Refresca el cupo por si la ventana de 24h ya venció y valida límite diario
+    usadoDiario = AppState.getCupoDiario().usado;
+    if (usadoDiario >= LIMITE_DIARIO) {
+      errEl.textContent = `⚠ Ya alcanzaste el límite diario de transferencias (${formatCurrency(LIMITE_DIARIO)}). Espera al reset para volver a transferir.`;
+      errEl.classList.remove('hidden'); return;
+    }
+    if (usadoDiario + monto > LIMITE_DIARIO) {
+      errEl.textContent = `⚠ Superas el límite diario. Disponible: ${formatCurrency(LIMITE_DIARIO - usadoDiario)}`;
+      errEl.classList.remove('hidden'); return;
+    }
     try {
       const origen  = getCuentaPropia(selOrigen.value);
       const destino = getCuentaPropia(selDestino.value);
       origen.transferir(destino, monto);
       AppState.guardar();
-      usadoDiario += monto;
+      AppState.agregarCupoDiario(monto);
+      usadoDiario = AppState.getCupoDiario().usado;
       document.getElementById('montoPropia').value = '';
       errEl.classList.add('hidden');
       showToast(`✅ Transferencia de ${formatCurrency(monto)} realizada.`, 'success');
@@ -467,15 +562,22 @@
       errExterno.textContent = '⚠ Ingresa un monto válido mayor a 0.';
       errExterno.classList.remove('hidden'); return;
     }
+    // Refresca el cupo actual por si la ventana de 24h ya venció
+    usadoDiario = AppState.getCupoDiario().usado;
+    if (usadoDiario >= LIMITE_DIARIO) {
+      errExterno.textContent = `⚠ Ya alcanzaste el límite diario de transferencias (${formatCurrency(LIMITE_DIARIO)}). Espera al reset para volver a transferir.`;
+      errExterno.classList.remove('hidden'); return;
+    }
     if (usadoDiario + monto > LIMITE_DIARIO) {
       errExterno.textContent = `⚠ Superas el límite diario. Disponible: ${formatCurrency(LIMITE_DIARIO - usadoDiario)}`;
       errExterno.classList.remove('hidden'); return;
     }
 
     try {
-      const nombreDestinatario = destinatarioActual.nombreCompleto; 
+      const nombreDestinatario = destinatarioActual.nombreCompleto;
       AppState.transferirAOtroUsuario(cuentaOrigen, destinatarioActual.usuario, monto, concepto);
-      usadoDiario += monto;
+      AppState.agregarCupoDiario(monto);
+      usadoDiario = AppState.getCupoDiario().usado;
       document.getElementById('montoExterno').value = '';
       document.getElementById('conceptoExterno').value = '';
       limpiarDestinatario();
@@ -510,6 +612,48 @@
     } catch(err) {
       showToast(err.message, 'error');
     }
+  });
+
+  const selRetirarT  = document.getElementById('cuentaRetirarT');
+  const infoRetirarT = document.getElementById('infoRetirarT');
+
+  function actualizarInfoRetirarT() {
+    if (selRetirarT.value === 'ahorros') {
+      infoRetirarT.textContent = 'Cuentas de Ahorros cobran 1.5% de interés sobre el retiro.';
+    } else {
+      infoRetirarT.textContent = 'Cuenta Corriente permite sobregiro hasta el 20% del saldo positivo.';
+    }
+  }
+
+  selRetirarT.addEventListener('change', actualizarInfoRetirarT);
+  actualizarInfoRetirarT();
+
+  document.getElementById('btnRetirarT').addEventListener('click', () => {
+    const tipo  = selRetirarT.value;
+    const monto = parseFloat(document.getElementById('montoRetirarT').value);
+    const errEl = document.getElementById('errorRetirarT');
+
+    if (isNaN(monto) || monto <= 0) {
+      errEl.textContent = '⚠ Ingresa un monto válido mayor a 0.';
+      errEl.classList.remove('hidden'); return;
+    }
+    try {
+      const cuenta = tipo === 'ahorros' ? AppState.getCuentaAhorros() : AppState.getCuentaCorriente();
+      cuenta.retirar(monto);
+      AppState.guardar();
+      document.getElementById('montoRetirarT').value = '';
+      errEl.classList.add('hidden');
+      showToast(`✅ Retiro de ${formatCurrency(monto)} realizado.`, 'success');
+      actualizarSaldos();
+      actualizarHistorialReciente();
+    } catch(err) {
+      errEl.textContent = '⚠ ' + err.message;
+      errEl.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('montoRetirarT').addEventListener('input', () => {
+    document.getElementById('errorRetirarT').classList.add('hidden');
   });
 
   actualizarSaldos();

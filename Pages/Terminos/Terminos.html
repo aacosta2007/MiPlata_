@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Términos y Condiciones</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .legal-doc { max-width: 800px; margin: 0 auto; }
+    .legal-doc h2 {
+      font-size: 1.15rem; font-weight: 700; color: var(--primary);
+      margin: 32px 0 12px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--gray-100);
+    }
+    .legal-doc h3 {
+      font-size: 1rem; font-weight: 600; color: var(--gray-800);
+      margin: 20px 0 8px;
+    }
+    .legal-doc p {
+      font-size: .9rem; color: var(--gray-600);
+      line-height: 1.7; margin-bottom: 12px;
+    }
+    .legal-doc ul, .legal-doc ol {
+      font-size: .9rem; color: var(--gray-600);
+      line-height: 1.8; margin: 0 0 14px 24px;
+    }
+    .legal-doc strong { color: var(--gray-800); }
+    .doc-meta {
+      background: var(--gray-50);
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      font-size: .82rem;
+      color: var(--gray-500);
+    }
+    .alert-legal {
+      background: #FEF3C7;
+      border-left: 4px solid var(--warning);
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      margin: 18px 0;
+      font-size: .88rem;
+      color: var(--gray-700);
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <!-- Header para modo público (sin sesión) -->
+    <header class="public-header" id="publicHeader" style="display:none;">
+      <a href="../iniciarSesion/iniciarSesion.html" class="public-header-brand">Mi Plata<span class="brand-sub">Banca Privada</span></a>
+      <nav class="public-header-nav">
+        <a href="../Privacidad/Privacidad.html">Privacidad</a>
+        <a href="../Terminos/Terminos.html">Términos</a>
+        <a href="../Seguridad/Seguridad.html">Seguridad</a>
+        <a href="../Contacto/Contacto.html">Contacto</a>
+        <a href="../iniciarSesion/iniciarSesion.html" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+      </nav>
+    </header>
+    <header class="topbar">
+      <div></div>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notificaciones">🔔<span class="badge"></span></button>
+        <button class="btn-logout" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <h1 class="page-title">📜 Términos y Condiciones</h1>
+        <p class="page-subtitle">Lee atentamente las condiciones que rigen el uso de la plataforma Mi Plata.</p>
+      </div>
+
+      <div class="card legal-doc">
+        <div class="doc-meta">
+          📅 <strong>Última actualización:</strong> 18 de mayo de 2026 &nbsp;|&nbsp;
+          📄 <strong>Versión:</strong> 3.0
+        </div>
+
+        <div class="alert-legal">
+          ⚠ <strong>Aviso:</strong> Mi Plata es una aplicación demostrativa con fines académicos. No constituye una entidad financiera real ni ofrece servicios bancarios genuinos. Los saldos y transacciones son simulados.
+        </div>
+
+        <h2>1. Aceptación de los términos</h2>
+        <p>
+          Al crear una cuenta y usar la plataforma <strong>Mi Plata S.A.</strong> aceptas estos Términos y Condiciones en su totalidad. Si no estás de acuerdo con alguno de ellos, debes abstenerte de utilizar los servicios.
+        </p>
+
+        <h2>2. Descripción del servicio</h2>
+        <p>Mi Plata ofrece una plataforma de banca virtual demostrativa que incluye:</p>
+        <ul>
+          <li>Apertura simulada de cuentas de Ahorros, Corriente y Tarjeta de Crédito.</li>
+          <li>Operaciones: consignar, retirar, transferir entre cuentas propias y a terceros.</li>
+          <li>Compras a crédito con plan de cuotas y simulador de amortización.</li>
+          <li>Generación y descarga de extractos mensuales en formato PDF.</li>
+          <li>Historial unificado de movimientos con filtros y búsqueda.</li>
+        </ul>
+
+        <h2>3. Registro y cuenta de usuario</h2>
+        <h3>3.1. Requisitos</h3>
+        <ul>
+          <li>Ser mayor de 18 años de edad.</li>
+          <li>Proporcionar información veraz y completa durante el registro.</li>
+          <li>Mantener actualizada la información de tu perfil.</li>
+          <li>Ser el único responsable de la seguridad de tu contraseña.</li>
+        </ul>
+
+        <h3>3.2. Bloqueo de cuenta</h3>
+        <p>
+          Por seguridad, tu cuenta se bloqueará automáticamente tras <strong>3 intentos fallidos consecutivos</strong> de inicio de sesión. En caso de bloqueo, deberás contactar a soporte para desbloquearla.
+        </p>
+
+        <h2>4. Uso correcto de la plataforma</h2>
+        <p>Te comprometes a:</p>
+        <ul>
+          <li>No suplantar la identidad de otro usuario.</li>
+          <li>No realizar operaciones fraudulentas o con fines ilícitos.</li>
+          <li>No intentar acceder a cuentas o sistemas de terceros sin autorización.</li>
+          <li>No usar bots, scripts o herramientas automatizadas que afecten el rendimiento.</li>
+          <li>No transmitir contenido malicioso o virus.</li>
+        </ul>
+
+        <h2>5. Productos financieros</h2>
+        <h3>5.1. Cuenta de Ahorros</h3>
+        <ul>
+          <li>Cobra una tasa del <strong>1.5%</strong> sobre el monto retirado.</li>
+          <li>No permite saldo negativo.</li>
+        </ul>
+
+        <h3>5.2. Cuenta Corriente</h3>
+        <ul>
+          <li>Permite sobregiro de hasta el <strong>20%</strong> del saldo positivo más alto registrado.</li>
+          <li>Al alcanzar el 100% del sobregiro, se bloquean las operaciones de salida.</li>
+        </ul>
+
+        <h3>5.3. Tarjeta de Crédito</h3>
+        <ul>
+          <li>Cupo inicial asignado al momento del registro: <strong>$5.000.000</strong>.</li>
+          <li>Tasas según plazo: 0% (1-2 cuotas), 1.9% (3-6 cuotas), 2.3% (7+ cuotas).</li>
+          <li>Sistema de amortización francesa (cuotas fijas).</li>
+          <li>Pago mínimo: una cuota mensual. Pago anticipado total disponible.</li>
+        </ul>
+
+        <h2>6. Límites operacionales</h2>
+        <ul>
+          <li><strong>Límite diario de transferencias:</strong> $5.000.000.</li>
+          <li>La ventana de 24 horas inicia con la primera transferencia del día.</li>
+          <li>Tras alcanzar el límite, no se permiten más transferencias hasta el reset.</li>
+        </ul>
+
+        <h2>7. Tarifas y costos</h2>
+        <p>
+          En esta versión demostrativa, las únicas tarifas aplicables son:
+        </p>
+        <ul>
+          <li>Interés del 1.5% sobre retiros de Cuenta de Ahorros.</li>
+          <li>Intereses de financiación según el plazo elegido en Tarjeta de Crédito.</li>
+        </ul>
+        <p>No se cobran cuotas de manejo, comisiones por transferencias ni costos de mantenimiento.</p>
+
+        <h2>8. Responsabilidades</h2>
+        <h3>8.1. De Mi Plata</h3>
+        <ul>
+          <li>Brindar acceso continuo al servicio según los horarios establecidos.</li>
+          <li>Mantener la integridad de los datos almacenados localmente.</li>
+          <li>Notificar oportunamente cambios significativos en los términos.</li>
+        </ul>
+
+        <h3>8.2. Del usuario</h3>
+        <ul>
+          <li>Custodiar las credenciales de acceso.</li>
+          <li>Revisar regularmente sus movimientos y extractos.</li>
+          <li>Reportar inmediatamente operaciones no reconocidas.</li>
+          <li>Cerrar sesión al usar dispositivos compartidos.</li>
+        </ul>
+
+        <h2>9. Modificaciones al servicio</h2>
+        <p>
+          Mi Plata se reserva el derecho de modificar, suspender o discontinuar cualquier funcionalidad de la plataforma con o sin previo aviso. Los cambios significativos serán comunicados con anticipación razonable.
+        </p>
+
+        <h2>10. Terminación</h2>
+        <p>
+          Puedes cerrar tu cuenta en cualquier momento desde tu perfil. Mi Plata también podrá suspender o cerrar cuentas que infrinjan estos términos, sin que ello genere derecho a indemnización alguna.
+        </p>
+
+        <h2>11. Limitación de responsabilidad</h2>
+        <p>
+          Dado que Mi Plata es una aplicación demostrativa, los saldos no representan dinero real. No nos hacemos responsables por:
+        </p>
+        <ul>
+          <li>Pérdida de datos por limpieza del navegador o uso del modo incógnito.</li>
+          <li>Interrupciones del servicio causadas por fallas técnicas de terceros.</li>
+          <li>Daños indirectos derivados del uso de la plataforma.</li>
+        </ul>
+
+        <h2>12. Ley aplicable y jurisdicción</h2>
+        <p>
+          Estos términos se rigen por las leyes de la República de Colombia. Cualquier controversia será resuelta ante los tribunales competentes de la ciudad de Bogotá D.C.
+        </p>
+
+        <h2>13. Contacto</h2>
+        <p>
+          Para cualquier consulta sobre estos términos, comunícate con nosotros a través de la <a href="../Contacto/Contacto.html" style="color:var(--accent);font-weight:600;">página de Contacto</a> o al correo <strong>legal@miplata.com</strong>.
+        </p>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html" style="font-weight:700;color:var(--accent);">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html">CONTACTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script type="module">
+  import { AppState, buildSidebar } from '../../assets/app.js';
+  if (AppState.getClienteActivo()) {
+    buildSidebar('');
+  } else {
+    document.body.classList.add('public-mode');
+    document.getElementById('publicHeader').style.display = '';
+  }
+</script>
+</body>
+</html>

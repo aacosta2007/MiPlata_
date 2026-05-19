@@ -22,6 +22,96 @@
       background:#EFF6FF; border:1px solid #BFDBFE; border-radius:var(--radius-md);
       padding:14px 16px; margin-top:16px;
     }
+
+    /* ── Resumen tarjeta ── */
+    .tc-summary {
+      display:grid; grid-template-columns:repeat(4, 1fr); gap:16px;
+      margin-bottom:24px;
+    }
+    .tc-stat {
+      background:var(--white); border:1px solid var(--gray-200);
+      border-radius:var(--radius-lg); padding:18px 20px;
+    }
+    .tc-stat-label {
+      font-size:.7rem; font-weight:700; color:var(--gray-500);
+      text-transform:uppercase; letter-spacing:.5px;
+    }
+    .tc-stat-value {
+      font-family:var(--font-mono); font-size:1.3rem; font-weight:700;
+      color:var(--gray-900); margin-top:6px;
+    }
+    .tc-stat-value.neg { color:var(--error); }
+    .tc-stat-value.pos { color:var(--success); }
+    .tc-stat-hint {
+      font-size:.7rem; color:var(--gray-400); margin-top:6px;
+    }
+    .tc-stat-highlight {
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(37,99,235,0.08);
+    }
+    .cupo-bar {
+      height:6px; background:var(--gray-200);
+      border-radius:99px; margin-top:10px; overflow:hidden;
+    }
+    .cupo-bar-fill {
+      height:100%; background:var(--accent);
+      border-radius:99px; transition:width .4s ease, background .3s;
+    }
+
+    /* ── Compras activas ── */
+    .compra-card {
+      background:var(--white); border:1px solid var(--gray-200);
+      border-radius:var(--radius-lg); padding:18px 20px; margin-bottom:14px;
+    }
+    .compra-head {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:12px; margin-bottom:12px;
+    }
+    .compra-desc { font-size:.95rem; font-weight:700; color:var(--gray-800); }
+    .compra-meta { font-size:.75rem; color:var(--gray-500); margin-top:2px; }
+    .compra-monto {
+      font-family:var(--font-mono); font-size:1.1rem;
+      font-weight:700; color:var(--gray-900); text-align:right;
+    }
+    .compra-grid {
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+      margin:12px 0;
+    }
+    .compra-grid-item {
+      background:var(--gray-50); border-radius:var(--radius-md); padding:10px 12px;
+    }
+    .compra-grid-label {
+      font-size:.65rem; font-weight:700; color:var(--gray-500);
+      text-transform:uppercase; letter-spacing:.5px;
+    }
+    .compra-grid-value {
+      font-family:var(--font-mono); font-size:.9rem; font-weight:700;
+      color:var(--gray-800); margin-top:4px;
+    }
+    .compra-progress {
+      height:8px; background:var(--gray-200);
+      border-radius:99px; margin:6px 0 12px; overflow:hidden;
+    }
+    .compra-progress-fill {
+      height:100%; background:var(--accent); border-radius:99px;
+      transition:width .4s ease;
+    }
+    .compra-actions { display:flex; gap:10px; }
+    .compra-actions .btn { flex:1; justify-content:center; }
+    .compra-pagada {
+      background:var(--success-bg); border-color:#BBF7D0;
+      opacity:.85;
+    }
+    .compra-pagada-chip {
+      background:var(--success); color:var(--white);
+      font-size:.7rem; font-weight:700; padding:3px 10px;
+      border-radius:99px; text-transform:uppercase; letter-spacing:.5px;
+    }
+
+    .empty-compras {
+      text-align:center; padding:32px 20px;
+      color:var(--gray-400); font-size:.85rem;
+    }
   </style>
 </head>
 <body>
@@ -43,10 +133,40 @@
     <main class="page-content">
       <div class="page-header flex justify-between items-center">
         <div>
-          <h1 class="page-title">Simulador de Compras</h1>
-          <p class="page-subtitle">Calcula el impacto de tus compras antes de usar tu tarjeta de crédito. Transparencia absoluta en tasas e intereses.</p>
+          <h1 class="page-title">Tarjeta de Crédito</h1>
+          <p class="page-subtitle">Simula, compra y paga tus cuotas. Transparencia absoluta en tasas e intereses.</p>
         </div>
-        <div class="tasa-badge">ℹ TASA ACTUAL: 1.9% – 2.3% EA</div>
+        <div class="flex items-center gap-16">
+          <button class="btn btn-secondary btn-sm" id="downloadExtractoTcBtn" title="Descargar extracto mensual completo">⬇ Descargar Extracto</button>
+          <div class="tasa-badge">ℹ TASA ACTUAL: 1.9% – 2.3% EA</div>
+        </div>
+      </div>
+
+      <!-- Resumen tarjeta -->
+      <div class="tc-summary">
+        <div class="tc-stat">
+          <div class="tc-stat-label">Límite de Crédito</div>
+          <div class="tc-stat-value" id="statCupo">$ --</div>
+          <div class="tc-stat-hint">Cupo máximo asignado</div>
+        </div>
+        <div class="tc-stat">
+          <div class="tc-stat-label">Deuda Actual</div>
+          <div class="tc-stat-value neg" id="statDeuda">$ --</div>
+          <div class="tc-stat-hint">Sube con compras, baja con pagos</div>
+        </div>
+        <div class="tc-stat tc-stat-highlight">
+          <div class="tc-stat-label">Cupo Disponible</div>
+          <div class="tc-stat-value pos" id="statDisponible">$ --</div>
+          <div class="cupo-bar">
+            <div class="cupo-bar-fill" id="cupoBarFill" style="width:0%"></div>
+          </div>
+          <div class="tc-stat-hint" id="cupoUsadoHint">0% del cupo usado</div>
+        </div>
+        <div class="tc-stat">
+          <div class="tc-stat-label">Próxima Cuota Total</div>
+          <div class="tc-stat-value" id="statProxCuota">$ --</div>
+          <div class="tc-stat-hint">Suma de todas las cuotas activas</div>
+        </div>
       </div>
 
       <div class="sim-grid">
@@ -57,29 +177,45 @@
           </h3>
 
           <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Descripción</label>
+            <input class="form-control" type="text"
+              id="descCompra" placeholder="Ej: Computador portátil" />
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
             <label class="form-label">Monto de la compra</label>
             <input class="form-control form-control-mono" type="number"
-              id="montoCompra" value="1500000" min="1" />
+              id="montoCompra" placeholder="$ 0" min="1" />
           </div>
 
           <div class="form-group" style="margin-bottom:20px;">
             <label class="form-label">Número de cuotas</label>
             <select class="form-control" id="numCuotas">
+              <option value="" selected disabled>Selecciona el plazo</option>
               <option value="1">1 Cuota (0%)</option>
               <option value="2">2 Cuotas (0%)</option>
               <option value="3">3 Cuotas (1.9%)</option>
               <option value="4">4 Cuotas (1.9%)</option>
               <option value="5">5 Cuotas (1.9%)</option>
-              <option value="6" selected>6 Cuotas (1.9%)</option>
+              <option value="6">6 Cuotas (1.9%)</option>
               <option value="7">7 Cuotas (2.3%)</option>
               <option value="12">12 Cuotas (2.3%)</option>
               <option value="24">24 Cuotas (2.3%)</option>
             </select>
           </div>
 
-          <button class="btn btn-primary btn-full" id="btnSimular">
-            📊 SIMULAR COMPRA
-          </button>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button class="btn btn-secondary btn-full" id="btnSimular">
+              📊 Calcular Cuotas (Solo Simulación)
+            </button>
+            <button class="btn btn-primary btn-full btn-lg" id="btnRealizarCompra">
+              ✅ Realizar Compra
+            </button>
+            <div class="form-hint" style="text-align:center; line-height:1.4;">
+              La <strong>simulación</strong> solo calcula sin cobrar.<br>
+              La <strong>compra</strong> sí carga el monto a tu tarjeta.
+            </div>
+          </div>
 
           <div class="sin-interes-note">
             <div style="font-size:.9rem;font-weight:700;color:var(--primary);">Sin intereses hasta 2 cuotas</div>
@@ -109,6 +245,10 @@
                 <div class="text-xs text-muted" style="margin-top:4px;" id="interesTotal">Intereses totales: $0</div>
               </div>
             </div>
+            <div class="alert alert-info" style="margin-top:8px;">
+              <span>ℹ</span>
+              <span>Esta es solo una simulación. Presiona <strong>"Realizar Compra"</strong> en el panel izquierdo para cargarla a tu tarjeta.</span>
+            </div>
           </div>
 
           <!-- Tabla amortización -->
@@ -133,6 +273,35 @@
 
         </div>
       </div>
+
+      <!-- Mis Compras Activas -->
+      <div style="margin-top:32px;">
+        <div class="flex justify-between items-center" style="margin-bottom:14px;">
+          <h2 style="font-size:1.25rem;font-weight:700;color:var(--gray-900);">📋 Mis Compras a Crédito</h2>
+          <div class="text-xs text-muted" id="comprasResumen">0 compras activas</div>
+        </div>
+
+        <!-- Selector global de cuenta de pago -->
+        <div class="card" style="margin-bottom:16px;padding:16px 20px;">
+          <div class="flex items-center gap-16" style="flex-wrap:wrap;">
+            <div style="flex:1;min-width:240px;">
+              <div class="form-label" style="margin-bottom:6px;">💳 Cuenta para pagar tus cuotas</div>
+              <select class="form-control" id="cuentaPagoTC">
+                <option value="ahorros"   id="pagoOptAhorros">Ahorros •••• ----</option>
+                <option value="corriente" id="pagoOptCorriente">Corriente •••• ----</option>
+              </select>
+            </div>
+            <div style="text-align:right;">
+              <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.5px;font-weight:700;">SALDO DISPONIBLE</div>
+              <div style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--success);margin-top:2px;" id="saldoCuentaPago">$ --</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="comprasLista">
+          <div class="empty-compras">Cargando...</div>
+        </div>
+      </div>
     </main>
 
     <footer class="page-footer">
@@ -140,24 +309,71 @@
         <div style="font-size:.9rem;font-weight:700;color:var(--accent);">Mi Plata</div>
         <div class="text-xs text-muted">Soluciones financieras de alta gama para el usuario moderno.</div>
       </div>
-      <div class="footer-links"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Seguridad</a><a href="#">Contacto</a></div>
+      <div class="footer-links">
+        <a href="../Privacidad/Privacidad.html">Privacidad</a>
+        <a href="../Terminos/Terminos.html">Términos</a>
+        <a href="../Seguridad/Seguridad.html">Seguridad</a>
+        <a href="../Contacto/Contacto.html">Contacto</a>
+      </div>
       <span class="text-xs text-muted">© 2024 Mi Plata S.A.</span>
     </footer>
   </div>
 </div>
 
 <script type="module">
-  import { AppState, formatCurrency, showToast, buildSidebar } from '../../assets/app.js';
+  import { AppState, formatCurrency, formatDate, showToast, buildSidebar,
+           generarPDFTarjetaCredito } from '../../assets/app.js';
   try { AppState.requireAuth(); } catch(e) { if(e.message==='NO_AUTH') throw e; }
   buildSidebar('tarjeta');
 
   const tc = AppState.getTarjetaCredito();
 
-  document.getElementById('btnSimular').addEventListener('click', () => {
-    const monto  = parseFloat(String(document.getElementById('montoCompra').value).trim().replace(',','.'));
-    const cuotas = parseInt(document.getElementById('numCuotas').value);
+  const inputMonto  = document.getElementById('montoCompra');
+  const inputCuotas = document.getElementById('numCuotas');
+  const inputDesc   = document.getElementById('descCompra');
+  const selectCuentaPago = document.getElementById('cuentaPagoTC');
+  const saldoCuentaPago  = document.getElementById('saldoCuentaPago');
 
-    if (isNaN(monto) || monto <= 0) { showToast('Ingresa un monto válido mayor a 0.', 'error'); return; }
+  function getCuentaPagoSeleccionada() {
+    return selectCuentaPago.value === 'ahorros'
+      ? AppState.getCuentaAhorros()
+      : AppState.getCuentaCorriente();
+  }
+
+  function renderResumenTarjeta() {
+    document.getElementById('statCupo').textContent       = formatCurrency(tc.cupo);
+    document.getElementById('statDeuda').textContent      = formatCurrency(tc.deuda);
+    document.getElementById('statDisponible').textContent = formatCurrency(tc.cupoDisponible);
+    document.getElementById('statProxCuota').textContent  = formatCurrency(tc.proximaCuotaTotal);
+
+    const pctUsado = tc.cupo > 0 ? Math.min((tc.deuda / tc.cupo) * 100, 100) : 0;
+    const barFill = document.getElementById('cupoBarFill');
+    barFill.style.width = `${pctUsado}%`;
+    barFill.style.background = pctUsado > 80 ? 'var(--error)'
+                              : pctUsado > 50 ? 'var(--warning)'
+                              : 'var(--accent)';
+    document.getElementById('cupoUsadoHint').textContent =
+      `${pctUsado.toFixed(1)}% del cupo usado`;
+  }
+
+  function renderCuentaPago() {
+    const ah = AppState.getCuentaAhorros();
+    const co = AppState.getCuentaCorriente();
+    document.getElementById('pagoOptAhorros').textContent   = `Ahorros — ${ah.numeroCuenta} (${formatCurrency(ah.saldo)})`;
+    document.getElementById('pagoOptCorriente').textContent = `Corriente — ${co.numeroCuenta} (${formatCurrency(co.saldo)})`;
+    const cuenta = getCuentaPagoSeleccionada();
+    saldoCuentaPago.textContent = formatCurrency(cuenta.saldo);
+    saldoCuentaPago.style.color = cuenta.saldo > 0 ? 'var(--success)' : 'var(--error)';
+  }
+
+  selectCuentaPago.addEventListener('change', renderCuentaPago);
+
+  function simular() {
+    const monto  = parseFloat(String(inputMonto.value).trim().replace(',','.'));
+    const cuotas = parseInt(inputCuotas.value);
+
+    if (isNaN(monto) || monto <= 0) { showToast('Ingresa un monto válido mayor a 0.', 'error'); return false; }
+    if (isNaN(cuotas) || cuotas < 1) { showToast('Selecciona un plazo de cuotas.', 'error'); return false; }
 
     const tasa        = tc.calcularTasa(cuotas);
     const cuotaMensual= tc.calcularCuotaMensual(monto, cuotas);
@@ -183,14 +399,165 @@
         <td style="text-align:right;">${formatCurrency(row.saldo)}</td>
       </tr>
     `).join('');
+    return true;
+  }
+
+  document.getElementById('btnSimular').addEventListener('click', simular);
+
+  document.getElementById('btnRealizarCompra').addEventListener('click', () => {
+    const monto  = parseFloat(String(inputMonto.value).trim().replace(',','.'));
+    const cuotas = parseInt(inputCuotas.value);
+    const desc   = (inputDesc.value || '').trim() || 'Compra a crédito';
+
+    if (isNaN(monto) || monto <= 0) {
+      showToast('Ingresa un monto válido mayor a 0.', 'error');
+      return;
+    }
+    if (isNaN(cuotas) || cuotas < 1) {
+      showToast('Selecciona un plazo de cuotas.', 'error');
+      return;
+    }
+    try {
+      tc.comprar(monto, cuotas, desc);
+      AppState.guardar();
+      showToast(`✅ Compra de ${formatCurrency(monto)} cargada a tu tarjeta en ${cuotas} cuota(s).`, 'success');
+      inputMonto.value  = '';
+      inputDesc.value   = '';
+      inputCuotas.value = '';
+      document.getElementById('resumenCard').style.display = 'none';
+      document.getElementById('tablaCard').style.display   = 'none';
+      renderResumenTarjeta();
+      renderCompras();
+    } catch(err) {
+      showToast(err.message, 'error', 5000);
+    }
   });
 
-  document.getElementById('btnSimular').click();
+  function renderCompras() {
+    const cont = document.getElementById('comprasLista');
+    const resumen = document.getElementById('comprasResumen');
+    const activas = tc.comprasActivas;
+    const pagadas = tc.compras.filter(c => c.estado === 'pagada');
+
+    resumen.textContent = `${activas.length} activa(s) · ${pagadas.length} pagada(s) · ${tc.cuotasPendientesTotales} cuota(s) pendiente(s)`;
+
+    if (tc.compras.length === 0) {
+      cont.innerHTML = `<div class="empty-compras">No tienes compras a crédito todavía. Simula y realiza tu primera compra arriba.</div>`;
+      return;
+    }
+
+    const ordenadas = [...tc.compras].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    cont.innerHTML = ordenadas.map(c => {
+      const esPagada = c.estado === 'pagada';
+      const cuotasRestantes = c.cuotasTotales - c.cuotasPagadas;
+      const pct = (c.cuotasPagadas / c.cuotasTotales) * 100;
+      const montoTotalRestante = parseFloat((c.cuotaMensual * cuotasRestantes).toFixed(2));
+      return `
+        <div class="compra-card ${esPagada ? 'compra-pagada' : ''}">
+          <div class="compra-head">
+            <div>
+              <div class="compra-desc">${c.descripcion}</div>
+              <div class="compra-meta">${formatDate(c.fecha)} · ${c.cuotasTotales} cuota(s) · Tasa ${(c.tasa*100).toFixed(1)}%</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="compra-monto">${formatCurrency(c.montoOriginal)}</div>
+              ${esPagada ? `<span class="compra-pagada-chip">✅ Pagada</span>` : ''}
+            </div>
+          </div>
+
+          <div class="compra-grid">
+            <div class="compra-grid-item">
+              <div class="compra-grid-label">Cuota Mensual</div>
+              <div class="compra-grid-value">${formatCurrency(c.cuotaMensual)}</div>
+            </div>
+            <div class="compra-grid-item">
+              <div class="compra-grid-label">Cuotas Pagadas</div>
+              <div class="compra-grid-value">${c.cuotasPagadas} / ${c.cuotasTotales}</div>
+            </div>
+            <div class="compra-grid-item">
+              <div class="compra-grid-label">${esPagada ? 'Estado' : 'Saldo Capital Pendiente'}</div>
+              <div class="compra-grid-value">${esPagada ? '—' : formatCurrency(c.saldoPendiente)}</div>
+            </div>
+          </div>
+
+          <div class="compra-progress">
+            <div class="compra-progress-fill" style="width:${pct}%"></div>
+          </div>
+
+          ${esPagada ? '' : `
+            <div class="compra-actions">
+              <button class="btn btn-secondary" data-action="pagar-cuota" data-id="${c.id}">
+                💰 Pagar Cuota (${formatCurrency(c.cuotaMensual)})
+              </button>
+              <button class="btn btn-primary" data-action="pagar-total" data-id="${c.id}">
+                ⚡ Pagar Total (${formatCurrency(montoTotalRestante)})
+              </button>
+            </div>
+          `}
+        </div>`;
+    }).join('');
+
+    cont.querySelectorAll('[data-action="pagar-cuota"]').forEach(btn => {
+      btn.addEventListener('click', () => handlePagarCuota(Number(btn.dataset.id)));
+    });
+    cont.querySelectorAll('[data-action="pagar-total"]').forEach(btn => {
+      btn.addEventListener('click', () => handlePagarTotal(Number(btn.dataset.id)));
+    });
+  }
+
+  function handlePagarCuota(compraId) {
+    const cuentaOrigen = getCuentaPagoSeleccionada();
+    const nombreCuenta = selectCuentaPago.value === 'ahorros' ? 'Ahorros' : 'Corriente';
+    try {
+      const compra = tc.pagarCuota(compraId, cuentaOrigen);
+      AppState.guardar();
+      const msg = compra.estado === 'pagada'
+        ? `✅ Última cuota pagada desde ${nombreCuenta}. ¡Compra liquidada!`
+        : `✅ Cuota ${compra.cuotasPagadas}/${compra.cuotasTotales} pagada desde ${nombreCuenta}.`;
+      showToast(msg, 'success');
+      renderResumenTarjeta();
+      renderCuentaPago();
+      renderCompras();
+    } catch(err) {
+      showToast(err.message, 'error', 5000);
+    }
+  }
+
+  function handlePagarTotal(compraId) {
+    const cuentaOrigen = getCuentaPagoSeleccionada();
+    const nombreCuenta = selectCuentaPago.value === 'ahorros' ? 'Ahorros' : 'Corriente';
+    try {
+      tc.pagarCompraCompleta(compraId, cuentaOrigen);
+      AppState.guardar();
+      showToast(`✅ Compra pagada en su totalidad desde ${nombreCuenta}.`, 'success');
+      renderResumenTarjeta();
+      renderCuentaPago();
+      renderCompras();
+    } catch(err) {
+      showToast(err.message, 'error', 5000);
+    }
+  }
+
+  function descargarExtractoTC() {
+    const hoy = new Date();
+    showToast('Generando extracto de Tarjeta de Crédito...', 'success', 1500);
+    generarPDFTarjetaCredito(hoy.getMonth() + 1, hoy.getFullYear());
+  }
 
   document.getElementById('exportBtn').addEventListener('click', (e) => {
     e.preventDefault();
-    showToast('Exportación PDF no disponible en modo demo.', 'warning');
+    descargarExtractoTC();
   });
+
+  document.getElementById('downloadExtractoTcBtn')?.addEventListener('click', () => {
+    descargarExtractoTC();
+  });
+
+  // Inicialización
+  renderResumenTarjeta();
+  renderCuentaPago();
+  renderCompras();
 </script>
 </body>
 </html>

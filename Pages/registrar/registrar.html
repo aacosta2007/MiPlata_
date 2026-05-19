@@ -44,7 +44,7 @@
           <div class="step-num">1</div>
           <div>
             <div class="step-title">Datos Personales</div>
-            <div class="step-desc">Nombre, cédula y número de celular.</div>
+            <div class="step-desc">Nombre, cédula, celular y correo electrónico.</div>
           </div>
         </div>
         <div class="step-card">
@@ -115,6 +115,18 @@
               <span class="input-icon">📱</span>
             </div>
             <div class="form-error hidden" id="errCelular">⚠ Ingresa tu número de celular.</div>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label" for="correo">
+              Correo Electrónico <span class="label-hint">para notificaciones y extractos</span>
+            </label>
+            <div class="input-wrapper">
+              <input class="form-control" type="email" id="correo"
+                placeholder="Ej: maria@ejemplo.com" autocomplete="email" />
+              <span class="input-icon">✉️</span>
+            </div>
+            <div class="form-error hidden" id="errCorreo">⚠ Ingresa un correo electrónico válido.</div>
           </div>
 
           <button class="btn btn-primary btn-full btn-lg mt-24" id="btnPaso1">
@@ -196,6 +208,10 @@
                 <div style="font-weight:600; color:var(--gray-800);" id="resCelular">—</div>
               </div>
               <div>
+                <div class="form-label">Correo</div>
+                <div style="font-weight:600; color:var(--gray-800);" id="resCorreo">—</div>
+              </div>
+              <div style="grid-column:1 / -1;">
                 <div class="form-label">Usuario</div>
                 <div style="font-weight:600; color:var(--accent);" id="resUsuario">—</div>
               </div>
@@ -245,13 +261,13 @@
     <div class="footer-cols">
       <div>
         <div class="footer-col-title">LEGAL</div>
-        <a href="#">Privacidad</a>
-        <a href="#">Términos y Condiciones</a>
+        <a href="../Privacidad/Privacidad.html">Privacidad</a>
+        <a href="../Terminos/Terminos.html">Términos y Condiciones</a>
       </div>
       <div>
         <div class="footer-col-title">SOPORTE</div>
-        <a href="#">Seguridad</a>
-        <a href="#">Contacto</a>
+        <a href="../Seguridad/Seguridad.html">Seguridad</a>
+        <a href="../Contacto/Contacto.html">Contacto</a>
       </div>
     </div>
     <div class="footer-copy">© 2024 Mi Plata S.A. Todos los derechos reservados.</div>

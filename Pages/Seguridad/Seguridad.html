@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Seguridad</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .seg-hero {
+      background: linear-gradient(135deg, #16A34A, #15803D);
+      color: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .seg-hero-icon { font-size: 3rem; }
+    .seg-hero h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+    .seg-hero p { opacity: .9; font-size: .95rem; }
+
+    .seg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .seg-feature {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      border: 1px solid var(--gray-100);
+    }
+    .seg-feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: #DCFCE7;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+    }
+    .seg-feature-title { font-size: 1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+    .seg-feature-desc { font-size: .85rem; color: var(--gray-600); line-height: 1.6; }
+
+    .tip-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .tip-card .tip-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .tip-card .tip-content { flex: 1; }
+    .tip-card .tip-title { font-weight: 700; color: var(--gray-800); font-size: .92rem; margin-bottom: 4px; }
+    .tip-card .tip-desc { font-size: .85rem; color: var(--gray-600); line-height: 1.5; }
+
+    .seg-status {
+      background: linear-gradient(135deg, #DCFCE7, #BBF7D0);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .status-circle {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: var(--success);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .status-info h3 { font-size: 1.05rem; color: var(--gray-800); margin-bottom: 4px; }
+    .status-info p { font-size: .85rem; color: var(--gray-600); }
+
+    .section-title {
+      font-size: 1.1rem; font-weight: 700; color: var(--gray-800);
+      margin: 24px 0 14px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <!-- Header para modo público (sin sesión) -->
+    <header class="public-header" id="publicHeader" style="display:none;">
+      <a href="../iniciarSesion/iniciarSesion.html" class="public-header-brand">Mi Plata<span class="brand-sub">Banca Privada</span></a>
+      <nav class="public-header-nav">
+        <a href="../Privacidad/Privacidad.html">Privacidad</a>
+        <a href="../Terminos/Terminos.html">Términos</a>
+        <a href="../Seguridad/Seguridad.html">Seguridad</a>
+        <a href="../Contacto/Contacto.html">Contacto</a>
+        <a href="../iniciarSesion/iniciarSesion.html" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+      </nav>
+    </header>
+    <header class="topbar">
+      <div></div>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notificaciones">🔔<span class="badge"></span></button>
+        <button class="btn-logout" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="seg-hero">
+        <div class="seg-hero-icon">🛡</div>
+        <div>
+          <h1>Tu Seguridad es Nuestra Prioridad</h1>
+          <p>Conoce cómo protegemos tu información y aprende a mantener tu cuenta segura.</p>
+        </div>
+      </div>
+
+      <!-- Estado de seguridad de la cuenta -->
+      <div class="seg-status">
+        <div class="status-circle">✓</div>
+        <div class="status-info">
+          <h3>Tu cuenta está protegida</h3>
+          <p>Última revisión de seguridad: hace 2 horas. Nivel: <strong>Alto</strong></p>
+        </div>
+      </div>
+
+      <!-- Medidas de seguridad implementadas -->
+      <div class="section-title">🔐 Cómo te protegemos</div>
+      <div class="seg-grid">
+        <div class="seg-feature">
+          <div class="seg-feature-icon">🔒</div>
+          <div class="seg-feature-title">Encriptación SSL 256-bit</div>
+          <div class="seg-feature-desc">Toda la comunicación entre tu navegador y nuestros servidores está cifrada con los estándares más altos de la industria.</div>
+        </div>
+        <div class="seg-feature">
+          <div class="seg-feature-icon">🚫</div>
+          <div class="seg-feature-title">Bloqueo automático</div>
+          <div class="seg-feature-desc">Tras 3 intentos fallidos de inicio de sesión, tu cuenta se bloquea automáticamente para prevenir ataques de fuerza bruta.</div>
+        </div>
+        <div class="seg-feature">
+          <div class="seg-feature-icon">👁</div>
+          <div class="seg-feature-title">Monitoreo de movimientos</div>
+          <div class="seg-feature-desc">Cada transacción queda registrada con fecha, hora, monto y descripción. Revisa tu historial cuando quieras.</div>
+        </div>
+        <div class="seg-feature">
+          <div class="seg-feature-icon">📊</div>
+          <div class="seg-feature-title">Límites de transferencia</div>
+          <div class="seg-feature-desc">Tope diario de $5.000.000 para transferencias, minimizando el impacto de cualquier acceso no autorizado.</div>
+        </div>
+        <div class="seg-feature">
+          <div class="seg-feature-icon">🧪</div>
+          <div class="seg-feature-title">Validación de contraseñas</div>
+          <div class="seg-feature-desc">Mínimo 6 caracteres con medidor de fortaleza visible durante el registro y cambio de contraseña.</div>
+        </div>
+        <div class="seg-feature">
+          <div class="seg-feature-icon">🔄</div>
+          <div class="seg-feature-title">Sesiones controladas</div>
+          <div class="seg-feature-desc">Tu sesión se cierra automáticamente al salir del navegador. Siempre puedes cerrarla manualmente desde cualquier página.</div>
+        </div>
+      </div>
+
+      <!-- Recomendaciones para el usuario -->
+      <div class="section-title">💡 Recomendaciones para mantenerte seguro</div>
+
+      <div class="tip-card">
+        <span class="tip-icon">🔑</span>
+        <div class="tip-content">
+          <div class="tip-title">Usa una contraseña única y fuerte</div>
+          <div class="tip-desc">No reutilices contraseñas de otros servicios. Combina mayúsculas, minúsculas, números y símbolos. Considera usar un gestor de contraseñas.</div>
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <span class="tip-icon">📱</span>
+        <div class="tip-content">
+          <div class="tip-title">Cierra sesión en dispositivos compartidos</div>
+          <div class="tip-desc">Si usas Mi Plata en una computadora pública o compartida, asegúrate de cerrar sesión al terminar.</div>
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <span class="tip-icon">⚠</span>
+        <div class="tip-content">
+          <div class="tip-title">Desconfía de correos sospechosos</div>
+          <div class="tip-desc">Mi Plata nunca te pedirá tu contraseña por correo. Si recibes algo sospechoso, repórtalo a <strong>seguridad@miplata.com</strong>.</div>
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <span class="tip-icon">🔍</span>
+        <div class="tip-content">
+          <div class="tip-title">Revisa tu historial regularmente</div>
+          <div class="tip-desc">Consulta tus movimientos al menos una vez por semana. Si encuentras alguna transacción que no reconoces, repórtala inmediatamente.</div>
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <span class="tip-icon">🔄</span>
+        <div class="tip-content">
+          <div class="tip-title">Cambia tu contraseña periódicamente</div>
+          <div class="tip-desc">Te recomendamos cambiar tu contraseña cada 90 días desde la sección de Perfil.</div>
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <span class="tip-icon">🌐</span>
+        <div class="tip-content">
+          <div class="tip-title">Verifica siempre la URL</div>
+          <div class="tip-desc">Asegúrate de estar en el sitio oficial de Mi Plata antes de ingresar tus credenciales. Verifica que la conexión sea segura (🔒 en la barra de direcciones).</div>
+        </div>
+      </div>
+
+      <!-- Reportar problema -->
+      <div class="card mt-24" style="background:#FEF3C7;border-left:4px solid var(--warning);padding:24px;">
+        <div style="display:flex;gap:16px;align-items:center;">
+          <span style="font-size:2rem;">🚨</span>
+          <div style="flex:1;">
+            <h3 style="font-size:1.05rem;color:var(--gray-800);margin-bottom:4px;">¿Detectaste actividad sospechosa?</h3>
+            <p class="text-sm text-muted" style="margin-bottom:0;">Repórtala de inmediato. Nuestro equipo investiga cada caso y puede bloquear tu cuenta como medida preventiva.</p>
+          </div>
+          <a href="../Contacto/Contacto.html" class="btn btn-primary">Reportar Ahora</a>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html" style="font-weight:700;color:var(--accent);">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html">CONTACTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script type="module">
+  import { AppState, buildSidebar } from '../../assets/app.js';
+  if (AppState.getClienteActivo()) {
+    buildSidebar('');
+  } else {
+    document.body.classList.add('public-mode');
+    document.getElementById('publicHeader').style.display = '';
+  }
+</script>
+</body>
+</html>
