@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Política de Privacidad</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .legal-doc { max-width: 800px; margin: 0 auto; }
+    .legal-doc h2 {
+      font-size: 1.15rem; font-weight: 700; color: var(--primary);
+      margin: 32px 0 12px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--gray-100);
+    }
+    .legal-doc h3 {
+      font-size: 1rem; font-weight: 600; color: var(--gray-800);
+      margin: 20px 0 8px;
+    }
+    .legal-doc p {
+      font-size: .9rem; color: var(--gray-600);
+      line-height: 1.7; margin-bottom: 12px;
+    }
+    .legal-doc ul {
+      font-size: .9rem; color: var(--gray-600);
+      line-height: 1.8; margin: 0 0 14px 24px;
+    }
+    .legal-doc strong { color: var(--gray-800); }
+    .doc-meta {
+      background: var(--gray-50);
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      font-size: .82rem;
+      color: var(--gray-500);
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <!-- Header para modo público (sin sesión) -->
+    <header class="public-header" id="publicHeader" style="display:none;">
+      <a href="../iniciarSesion/iniciarSesion.html" class="public-header-brand">Mi Plata<span class="brand-sub">Banca Privada</span></a>
+      <nav class="public-header-nav">
+        <a href="../Privacidad/Privacidad.html">Privacidad</a>
+        <a href="../Terminos/Terminos.html">Términos</a>
+        <a href="../Seguridad/Seguridad.html">Seguridad</a>
+        <a href="../Contacto/Contacto.html">Contacto</a>
+        <a href="../iniciarSesion/iniciarSesion.html" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+      </nav>
+    </header>
+    <header class="topbar">
+      <div></div>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notificaciones">🔔<span class="badge"></span></button>
+        <button class="btn-logout" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-header">
+        <h1 class="page-title">🔒 Política de Privacidad</h1>
+        <p class="page-subtitle">Tu información personal es importante para nosotros. Conoce cómo la tratamos y protegemos.</p>
+      </div>
+
+      <div class="card legal-doc">
+        <div class="doc-meta">
+          📅 <strong>Última actualización:</strong> 18 de mayo de 2026 &nbsp;|&nbsp;
+          📄 <strong>Versión:</strong> 2.1
+        </div>
+
+        <h2>1. Introducción</h2>
+        <p>
+          En <strong>Mi Plata S.A.</strong> (en adelante "Mi Plata") respetamos tu privacidad y nos comprometemos a proteger la información personal que compartes con nosotros. Esta política describe qué información recopilamos, cómo la usamos y qué derechos tienes sobre ella.
+        </p>
+        <p>
+          Al usar nuestra plataforma de banca virtual, aceptas las prácticas descritas en este documento. Si no estás de acuerdo, te pedimos que no utilices nuestros servicios.
+        </p>
+
+        <h2>2. Información que recopilamos</h2>
+        <p>Para brindarte nuestros servicios, recopilamos los siguientes datos:</p>
+        <h3>2.1. Datos de identificación</h3>
+        <ul>
+          <li><strong>Nombre completo:</strong> tal como aparece en tu documento de identidad.</li>
+          <li><strong>Número de identificación:</strong> cédula u otro documento oficial.</li>
+          <li><strong>Número de celular:</strong> para verificación y notificaciones.</li>
+          <li><strong>Correo electrónico:</strong> para enviarte extractos y comunicaciones importantes.</li>
+        </ul>
+
+        <h3>2.2. Credenciales de acceso</h3>
+        <ul>
+          <li><strong>Nombre de usuario</strong> elegido durante el registro.</li>
+          <li><strong>Contraseña</strong> almacenada cifrada localmente en tu dispositivo.</li>
+        </ul>
+
+        <h3>2.3. Datos financieros</h3>
+        <ul>
+          <li>Historial de movimientos: consignaciones, retiros, transferencias y pagos.</li>
+          <li>Saldos de tus cuentas de Ahorros, Corriente y Tarjeta de Crédito.</li>
+          <li>Compras a crédito y plan de pagos asociado.</li>
+        </ul>
+
+        <h2>3. Cómo usamos tu información</h2>
+        <p>Tu información se usa exclusivamente para:</p>
+        <ul>
+          <li>Permitirte el acceso seguro a tus cuentas.</li>
+          <li>Procesar las transacciones que realices.</li>
+          <li>Generar tus extractos mensuales en PDF.</li>
+          <li>Detectar y prevenir fraudes o accesos no autorizados.</li>
+          <li>Mejorar la experiencia de uso de la plataforma.</li>
+          <li>Cumplir con obligaciones legales y regulatorias.</li>
+        </ul>
+
+        <h2>4. Almacenamiento de datos</h2>
+        <p>
+          Como aplicación de banca virtual demo, los datos se almacenan en el <strong>almacenamiento local de tu navegador</strong> (localStorage). Esto significa que:
+        </p>
+        <ul>
+          <li>Tus datos permanecen en tu dispositivo y no se envían a servidores externos.</li>
+          <li>Si limpias el caché o usas el modo incógnito, perderás tu información.</li>
+          <li>No compartimos información con terceros ni hacemos análisis externos.</li>
+        </ul>
+
+        <h2>5. Tus derechos</h2>
+        <p>Como titular de los datos, tienes derecho a:</p>
+        <ul>
+          <li><strong>Acceder</strong> a la información que tenemos sobre ti.</li>
+          <li><strong>Actualizar</strong> datos incorrectos desde tu sección de Perfil.</li>
+          <li><strong>Eliminar</strong> tu cuenta y todos los datos asociados en cualquier momento.</li>
+          <li><strong>Exportar</strong> tu información en formato PDF desde la sección de extractos.</li>
+          <li><strong>Revocar</strong> tu consentimiento al uso de tus datos.</li>
+        </ul>
+
+        <h2>6. Cookies y tecnologías similares</h2>
+        <p>
+          Mi Plata utiliza <strong>localStorage</strong> y <strong>sessionStorage</strong> para mantener tu sesión activa y recordar tus preferencias. No usamos cookies de terceros ni de seguimiento publicitario.
+        </p>
+
+        <h2>7. Seguridad</h2>
+        <p>
+          Implementamos medidas técnicas y administrativas para proteger tu información:
+        </p>
+        <ul>
+          <li>Validación estricta de contraseñas (mínimo 6 caracteres).</li>
+          <li>Bloqueo automático tras 3 intentos fallidos de inicio de sesión.</li>
+          <li>Comunicación cifrada (SSL 256-bit) cuando se despliega en producción.</li>
+        </ul>
+        <p>Para más detalles consulta nuestra sección de <a href="../Seguridad/Seguridad.html" style="color:var(--accent);font-weight:600;">Seguridad</a>.</p>
+
+        <h2>8. Menores de edad</h2>
+        <p>
+          Nuestros servicios están dirigidos a personas mayores de 18 años. No recopilamos intencionalmente información de menores. Si descubres que un menor ha proporcionado datos, por favor contáctanos para eliminarlos.
+        </p>
+
+        <h2>9. Cambios a esta política</h2>
+        <p>
+          Podemos actualizar esta política ocasionalmente. Te notificaremos cualquier cambio significativo por correo electrónico o mediante un aviso en la plataforma. Te recomendamos revisar este documento periódicamente.
+        </p>
+
+        <h2>10. Contacto</h2>
+        <p>
+          Si tienes preguntas sobre esta política o el manejo de tus datos, puedes contactarnos:
+        </p>
+        <ul>
+          <li>📧 Correo: <strong>privacidad@miplata.com</strong></li>
+          <li>📞 Teléfono: <strong>+57 (1) 800-MIPLATA</strong></li>
+          <li>📍 Dirección: Carrera 7 #71-21, Bogotá, Colombia</li>
+        </ul>
+        <p>
+          O visita nuestra <a href="../Contacto/Contacto.html" style="color:var(--accent);font-weight:600;">página de Contacto</a>.
+        </p>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="../Privacidad/Privacidad.html" style="font-weight:700;color:var(--accent);">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html">CONTACTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script type="module">
+  import { AppState, buildSidebar } from '../../assets/app.js';
+  if (AppState.getClienteActivo()) {
+    buildSidebar('');
+  } else {
+    // Modo público: ocultar sidebar/topbar y mostrar header alternativo
+    document.body.classList.add('public-mode');
+    document.getElementById('publicHeader').style.display = '';
+  }
+</script>
+</body>
+</html>

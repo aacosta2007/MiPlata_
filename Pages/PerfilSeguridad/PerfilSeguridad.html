@@ -81,6 +81,10 @@
                 <label class="form-label">Teléfono</label>
                 <input class="form-control" type="text" id="editTelefono" />
               </div>
+              <div class="form-group mt-16">
+                <label class="form-label">Correo electrónico</label>
+                <input class="form-control" type="email" id="editCorreo" placeholder="ejemplo@correo.com" />
+              </div>
               <div class="flex gap-16 mt-24">
                 <button class="btn btn-secondary" id="cancelarEditar">Cancelar</button>
                 <button class="btn btn-primary" id="guardarEditar">Guardar Cambios</button>
@@ -148,7 +152,10 @@
     <footer class="page-footer">
       <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
       <div class="footer-links">
-        <a href="#">PRIVACIDAD</a><a href="#">TÉRMINOS Y CONDICIONES</a><a href="#">SEGURIDAD</a><a href="#">CONTACTO</a>
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html">CONTACTO</a>
       </div>
     </footer>
   </div>
@@ -166,7 +173,7 @@ const tarjeta   = AppState.getTarjetaCredito();
 
 document.getElementById('userId').textContent    = `ID-${String(cliente.id).padStart(6,'0')}`;
 document.getElementById('dnombre').textContent   = cliente.nombreCompleto;
-document.getElementById('dcorreo').textContent   = `${cliente.usuario}@miplata.com`;
+document.getElementById('dcorreo').textContent   = cliente.correo || `${cliente.usuario}@miplata.com`;
 document.getElementById('dtelefono').textContent = cliente.celular;
 document.getElementById('dusuario').textContent  = `@${cliente.usuario}`;
 // Números de cuenta reales
@@ -182,6 +189,7 @@ const formEditar  = document.getElementById('formEditar');
 btnEditar.addEventListener('click', () => {
   document.getElementById('editNombre').value   = cliente.nombreCompleto;
   document.getElementById('editTelefono').value = cliente.celular;
+  document.getElementById('editCorreo').value   = cliente.correo || '';
   vistaData.style.display = 'none';
   formEditar.style.display = '';
   btnEditar.style.display = 'none';
@@ -196,12 +204,17 @@ document.getElementById('cancelarEditar').addEventListener('click', () => {
 document.getElementById('guardarEditar').addEventListener('click', () => {
   const nombre   = document.getElementById('editNombre').value.trim();
   const telefono = document.getElementById('editTelefono').value.trim();
+  const correo   = document.getElementById('editCorreo').value.trim();
   if (!nombre) { showToast('El nombre no puede estar vacío.', 'error'); return; }
+  if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    showToast('El correo electrónico no es válido.', 'error'); return;
+  }
   try {
-    cliente.editarPerfil(nombre, telefono);
-    AppState.actualizarPerfil(nombre, telefono);
+    cliente.editarPerfil(nombre, telefono, correo);
+    AppState.actualizarPerfil(nombre, telefono, correo);
     document.getElementById('dnombre').textContent   = cliente.nombreCompleto;
     document.getElementById('dtelefono').textContent = cliente.celular;
+    document.getElementById('dcorreo').textContent   = cliente.correo || `${cliente.usuario}@miplata.com`;
     vistaData.style.display = '';
     formEditar.style.display = 'none';
     btnEditar.style.display = '';

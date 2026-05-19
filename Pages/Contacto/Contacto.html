@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Plata — Contacto</title>
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <style>
+    .contacto-hero {
+      background: linear-gradient(135deg, #1A3A6B, #2563EB);
+      color: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .contacto-hero h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .contacto-hero p { opacity: .9; font-size: 1rem; }
+
+    .contacto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .contacto-grid { grid-template-columns: 1fr; }
+    }
+
+    .canal-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      border: 1px solid var(--gray-100);
+      transition: all .2s;
+    }
+    .canal-card:hover { box-shadow: var(--shadow-md); }
+    .canal-icon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--gray-50);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+    }
+    .canal-title { font-size: 1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 4px; }
+    .canal-info { font-size: .92rem; color: var(--accent); font-weight: 600; }
+    .canal-hours { font-size: .8rem; color: var(--gray-500); margin-top: 4px; }
+
+    .canales-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .sucursal-item {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .sucursal-item:last-child { border-bottom: none; }
+    .sucursal-name { font-weight: 700; color: var(--gray-800); font-size: .92rem; margin-bottom: 4px; }
+    .sucursal-addr { font-size: .82rem; color: var(--gray-600); line-height: 1.5; }
+
+    .form-success {
+      display: none;
+      background: #DCFCE7;
+      color: #15803D;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      margin-top: 16px;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+    .form-success.show { display: block; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <!-- Header para modo público (sin sesión) -->
+    <header class="public-header" id="publicHeader" style="display:none;">
+      <a href="../iniciarSesion/iniciarSesion.html" class="public-header-brand">Mi Plata<span class="brand-sub">Banca Privada</span></a>
+      <nav class="public-header-nav">
+        <a href="../Privacidad/Privacidad.html">Privacidad</a>
+        <a href="../Terminos/Terminos.html">Términos</a>
+        <a href="../Seguridad/Seguridad.html">Seguridad</a>
+        <a href="../Contacto/Contacto.html">Contacto</a>
+        <a href="../iniciarSesion/iniciarSesion.html" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+      </nav>
+    </header>
+    <header class="topbar">
+      <div></div>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notificaciones">🔔<span class="badge"></span></button>
+        <button class="btn-logout" onclick="window.appLogout()">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="contacto-hero">
+        <h1>📞 Contáctanos</h1>
+        <p>Estamos aquí para ayudarte. Elige el canal que prefieras o envíanos un mensaje.</p>
+      </div>
+
+      <!-- Canales rápidos -->
+      <div class="canales-grid">
+        <div class="canal-card">
+          <div class="canal-icon">📞</div>
+          <div class="canal-title">Línea de Atención</div>
+          <div class="canal-info">+57 (1) 800-MIPLATA</div>
+          <div class="canal-hours">Lun-Vie: 7am-8pm · Sáb: 8am-2pm</div>
+        </div>
+
+        <div class="canal-card">
+          <div class="canal-icon">📧</div>
+          <div class="canal-title">Soporte General</div>
+          <div class="canal-info">soporte@miplata.com</div>
+          <div class="canal-hours">Respuesta en 24 horas hábiles</div>
+        </div>
+
+        <div class="canal-card">
+          <div class="canal-icon">🚨</div>
+          <div class="canal-title">Reporte de Fraudes</div>
+          <div class="canal-info">seguridad@miplata.com</div>
+          <div class="canal-hours">Atención 24/7 los 365 días</div>
+        </div>
+
+        <div class="canal-card">
+          <div class="canal-icon">💬</div>
+          <div class="canal-title">Chat en Vivo</div>
+          <div class="canal-info">Disponible en la app</div>
+          <div class="canal-hours">Lun-Dom: 6am-10pm</div>
+        </div>
+
+        <div class="canal-card">
+          <div class="canal-icon">🐦</div>
+          <div class="canal-title">Redes Sociales</div>
+          <div class="canal-info">@MiPlataOficial</div>
+          <div class="canal-hours">Twitter · Facebook · Instagram</div>
+        </div>
+
+        <div class="canal-card">
+          <div class="canal-icon">📰</div>
+          <div class="canal-title">Prensa</div>
+          <div class="canal-info">prensa@miplata.com</div>
+          <div class="canal-hours">Comunicaciones corporativas</div>
+        </div>
+      </div>
+
+      <div class="contacto-grid">
+        <!-- Formulario -->
+        <div class="card">
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--gray-800);margin-bottom:6px;">✉️ Envíanos un mensaje</h3>
+          <p class="text-sm text-muted" style="margin-bottom:18px;">Completa el formulario y te responderemos a la mayor brevedad.</p>
+
+          <div class="form-group">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" type="text" id="cName" placeholder="Tu nombre" />
+            <span class="form-error hidden" id="errName">⚠ Ingresa tu nombre.</span>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label">Correo electrónico</label>
+            <input class="form-control" type="email" id="cEmail" placeholder="tu@correo.com" />
+            <span class="form-error hidden" id="errEmail">⚠ Ingresa un correo válido.</span>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label">Asunto</label>
+            <select class="form-control" id="cAsunto">
+              <option value="">Selecciona un asunto</option>
+              <option value="consulta">Consulta general</option>
+              <option value="problema">Reportar un problema</option>
+              <option value="sugerencia">Sugerencia</option>
+              <option value="fraude">Reporte de fraude</option>
+              <option value="otro">Otro</option>
+            </select>
+            <span class="form-error hidden" id="errAsunto">⚠ Selecciona un asunto.</span>
+          </div>
+
+          <div class="form-group mt-16">
+            <label class="form-label">Mensaje</label>
+            <textarea class="form-control" id="cMensaje" rows="5" placeholder="Cuéntanos cómo podemos ayudarte..." style="resize:vertical;font-family:var(--font-main);"></textarea>
+            <span class="form-error hidden" id="errMensaje">⚠ Escribe un mensaje de al menos 10 caracteres.</span>
+          </div>
+
+          <button class="btn btn-primary btn-full mt-24" id="btnEnviar">📨 Enviar Mensaje</button>
+
+          <div class="form-success" id="formSuccess">
+            ✅ Tu mensaje fue enviado correctamente. Te responderemos pronto.
+          </div>
+        </div>
+
+        <!-- Información lateral -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Oficinas -->
+          <div class="card">
+            <h3 style="font-size:1rem;font-weight:700;color:var(--gray-800);margin-bottom:14px;">🏢 Nuestras Oficinas</h3>
+
+            <div class="sucursal-item">
+              <div class="sucursal-name">📍 Oficina Principal — Bogotá</div>
+              <div class="sucursal-addr">Carrera 7 #71-21, Torre B, Piso 14<br>Lun-Vie: 8am-5pm</div>
+            </div>
+
+            <div class="sucursal-item">
+              <div class="sucursal-name">📍 Sucursal Medellín</div>
+              <div class="sucursal-addr">Av. El Poblado #43A-15<br>Lun-Vie: 8am-5pm</div>
+            </div>
+
+            <div class="sucursal-item">
+              <div class="sucursal-name">📍 Sucursal Cali</div>
+              <div class="sucursal-addr">Av. 6N #28-110, Centro Empresarial<br>Lun-Vie: 8am-5pm</div>
+            </div>
+
+            <div class="sucursal-item">
+              <div class="sucursal-name">📍 Sucursal Barranquilla</div>
+              <div class="sucursal-addr">Cra. 53 #82-86, Centro Empresarial<br>Lun-Vie: 8am-5pm</div>
+            </div>
+          </div>
+
+          <!-- Antes de contactarnos -->
+          <div class="card" style="background:var(--gray-50);">
+            <h3 style="font-size:1rem;font-weight:700;color:var(--gray-800);margin-bottom:10px;">💡 Antes de contactarnos</h3>
+            <p class="text-sm text-muted" style="margin-bottom:12px;">Quizás encuentres tu respuesta más rápido en:</p>
+            <a href="../Ayuda/Ayuda.html" class="btn btn-secondary btn-sm" style="margin-right:8px;">📚 Centro de Ayuda</a>
+            <a href="../Seguridad/Seguridad.html" class="btn btn-secondary btn-sm">🛡 Seguridad</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <span>© 2024 Mi Plata S.A. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="../Privacidad/Privacidad.html">PRIVACIDAD</a>
+        <a href="../Terminos/Terminos.html">TÉRMINOS Y CONDICIONES</a>
+        <a href="../Seguridad/Seguridad.html">SEGURIDAD</a>
+        <a href="../Contacto/Contacto.html" style="font-weight:700;color:var(--accent);">CONTACTO</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script type="module">
+  import { AppState, buildSidebar, showToast } from '../../assets/app.js';
+  const cliente = AppState.getClienteActivo();
+  if (cliente) {
+    buildSidebar('');
+    // Prellenar con datos del usuario logueado
+    document.getElementById('cName').value = cliente.nombreCompleto || '';
+    document.getElementById('cEmail').value = cliente.correo || '';
+  } else {
+    document.body.classList.add('public-mode');
+    document.getElementById('publicHeader').style.display = '';
+  }
+
+  const elName    = document.getElementById('cName');
+  const elEmail   = document.getElementById('cEmail');
+  const elAsunto  = document.getElementById('cAsunto');
+  const elMensaje = document.getElementById('cMensaje');
+
+  document.getElementById('btnEnviar').addEventListener('click', () => {
+    const nombre   = elName.value.trim();
+    const email    = elEmail.value.trim();
+    const asunto   = elAsunto.value;
+    const mensaje  = elMensaje.value.trim();
+
+    const okNombre  = nombre.length >= 2;
+    const okEmail   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const okAsunto  = !!asunto;
+    const okMensaje = mensaje.length >= 10;
+
+    document.getElementById('errName').classList.toggle('hidden', okNombre);
+    document.getElementById('errEmail').classList.toggle('hidden', okEmail);
+    document.getElementById('errAsunto').classList.toggle('hidden', okAsunto);
+    document.getElementById('errMensaje').classList.toggle('hidden', okMensaje);
+
+    elName.classList.toggle('error', !okNombre);
+    elEmail.classList.toggle('error', !okEmail);
+    elAsunto.classList.toggle('error', !okAsunto);
+    elMensaje.classList.toggle('error', !okMensaje);
+
+    if (!okNombre || !okEmail || !okAsunto || !okMensaje) return;
+
+    // Simular envío
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    setTimeout(() => {
+      document.getElementById('formSuccess').classList.add('show');
+      showToast('✅ Mensaje enviado correctamente.', 'success');
+      elMensaje.value = '';
+      elAsunto.value = '';
+      btn.disabled = false;
+      btn.textContent = '📨 Enviar Mensaje';
+      setTimeout(() => document.getElementById('formSuccess').classList.remove('show'), 6000);
+    }, 800);
+  });
+
+  [elName, elEmail, elAsunto, elMensaje].forEach(el => {
+    el.addEventListener('input',  () => el.classList.remove('error'));
+    el.addEventListener('change', () => el.classList.remove('error'));
+  });
+</script>
+</body>
+</html>

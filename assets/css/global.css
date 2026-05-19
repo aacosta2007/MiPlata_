@@ -420,3 +420,47 @@ body {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .page-content { padding: 16px; }
 }
+
+/* ── Modo público: páginas accesibles sin sesión iniciada ── */
+.public-mode .sidebar { display: none; }
+.public-mode .main-content { margin-left: 0; }
+.public-mode .topbar { display: none; }
+
+.public-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.public-header-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.public-header-brand .brand-sub {
+  font-size: 0.65rem;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.public-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.public-header-nav a {
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.public-header-nav a:hover { color: var(--accent); }

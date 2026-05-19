@@ -1,6 +1,12 @@
 /* ── Dashboard specific ── */
 
-.cuenta-card { transition: box-shadow 0.2s; cursor: default; }
+.cuenta-card {
+  transition: box-shadow 0.2s;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
 .cuenta-card:hover { box-shadow: var(--shadow-md); }
 
 .cuenta-label {
@@ -22,7 +28,19 @@
   font-size: 0.8rem;
   color: var(--success);
   font-weight: 600;
-  margin-top: 8px;
+}
+
+/* Footer de cada card de cuenta: porcentaje a la izquierda, botón a la derecha */
+.cuenta-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.cuenta-footer .btn {
+  flex-shrink: 0;
 }
 
 /* Tarjeta oscura */

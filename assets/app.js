@@ -5,9 +5,10 @@ import { CuentaCorriente } from '../Models/cuentas/CuentaCorriente.js';
 import { TarjetaCredito }  from '../Models/cuentas/TarjetaCredito.js';
 import EstadoCuenta        from '../Models/enums/EstadoCuenta.js';
 
-const LS_SESSION  = 'miplata_session';
-const LS_USERS    = 'miplata_users';
-const LS_ATTEMPTS = 'miplata_attempts';
+const LS_SESSION     = 'miplata_session';
+const LS_USERS       = 'miplata_users';
+const LS_ATTEMPTS    = 'miplata_attempts';
+const LS_CUPO_DIARIO = 'miplata_cupo_diario';
 
 function serMovimiento(m) {
   return {
@@ -30,6 +31,7 @@ function serializarUsuario(datos) {
     cliente: {
       id: datos.cliente.id, identificacion: datos.cliente.identificacion,
       nombreCompleto: datos.cliente.nombreCompleto, celular: datos.cliente.celular,
+      correo: datos.cliente.correo || '',
       usuario: datos.cliente.usuario, contrasena: datos.cliente.contrasena,
       intentosFallidos: datos.cliente.intentosFallidos, bloqueado: datos.cliente.bloqueado,
     },
@@ -46,6 +48,7 @@ function serializarUsuario(datos) {
       corriente: {
         numeroCuenta: datos.cuentas.corriente.numeroCuenta,
         saldo: datos.cuentas.corriente.saldo,
+        limiteSobregiroBase: datos.cuentas.corriente.limiteSobregiroBase,
         fechaApertura: datos.cuentas.corriente.fechaApertura instanceof Date
           ? datos.cuentas.corriente.fechaApertura.toISOString()
           : datos.cuentas.corriente.fechaApertura,
@@ -62,6 +65,10 @@ function serializarUsuario(datos) {
           : datos.cuentas.tarjeta.fechaApertura,
         estado: datos.cuentas.tarjeta.estado,
         movimientos: datos.cuentas.tarjeta.movimientos.map(serMovimiento),
+        compras: (datos.cuentas.tarjeta.compras || []).map(c => ({
+          ...c,
+          fecha: c.fecha instanceof Date ? c.fecha.toISOString() : c.fecha,
+        })),
       },
     },
   };
@@ -71,7 +78,8 @@ function deserializarUsuario(p) {
   const cliente = new Cliente(
     p.cliente.id, p.cliente.identificacion, p.cliente.nombreCompleto,
     p.cliente.celular, p.cliente.usuario, p.cliente.contrasena,
-    p.cliente.intentosFallidos, p.cliente.bloqueado
+    p.cliente.intentosFallidos, p.cliente.bloqueado,
+    p.cliente.correo || ''
   );
   const ahorros = new CuentaAhorros(
     p.cuentas.ahorros.numeroCuenta, p.cuentas.ahorros.saldo,
@@ -81,7 +89,8 @@ function deserializarUsuario(p) {
 
   const corriente = new CuentaCorriente(
     p.cuentas.corriente.numeroCuenta, p.cuentas.corriente.saldo,
-    new Date(p.cuentas.corriente.fechaApertura), p.cuentas.corriente.estado
+    new Date(p.cuentas.corriente.fechaApertura), p.cuentas.corriente.estado,
+    p.cuentas.corriente.limiteSobregiroBase ?? null
   );
   p.cuentas.corriente.movimientos.forEach(m => corriente._cargarMovimiento(deserMovimiento(m)));
 
@@ -89,9 +98,12 @@ function deserializarUsuario(p) {
     p.cuentas.tarjeta.numeroCuenta, p.cuentas.tarjeta.cupo,
     new Date(p.cuentas.tarjeta.fechaApertura), p.cuentas.tarjeta.estado
   );
-  tarjeta.deuda = p.cuentas.tarjeta.deuda;
-  tarjeta.saldo = p.cuentas.tarjeta.deuda;
   p.cuentas.tarjeta.movimientos.forEach(m => tarjeta._cargarMovimiento(deserMovimiento(m)));
+  (p.cuentas.tarjeta.compras || []).forEach(c => tarjeta._cargarCompra(c));
+  if (p.cuentas.tarjeta.deuda !== undefined && p.cuentas.tarjeta.deuda !== null) {
+    tarjeta.deuda = p.cuentas.tarjeta.deuda;
+    tarjeta.saldo = p.cuentas.tarjeta.deuda;
+  }
 
   return { cliente, cuentas: { ahorros, corriente, tarjeta } };
 }
@@ -131,11 +143,11 @@ function inicializarDemoSiVacio() {
   migrarDatosAntiguos();
   const usuarios = cargarTodosLosUsuarios();
   if (usuarios.length === 0) {
-    const cliente   = new Cliente(1,'1-2345-6789','Alejandro Martínez Silva','+57 300 123 4567','alejandro','123456',0,false);
+    const cliente   = new Cliente(1,'1-2345-6789','Alejandro Martínez Silva','+57 300 123 4567','alejandro','123456',0,false,'alejandro@miplata.com');
     const ahorros   = new CuentaAhorros('8829', 12450000, new Date('2022-03-15'), EstadoCuenta.ACTIVA);
     const corriente = new CuentaCorriente('4820', 3120500, new Date('2021-07-01'), EstadoCuenta.ACTIVA);
     const tarjeta   = new TarjetaCredito('4402', 10000000, new Date('2023-01-10'), EstadoCuenta.ACTIVA);
-    tarjeta.deuda = 1760000; tarjeta.saldo = 1760000;
+    tarjeta.comprar(1760000, 12, 'Compra electrodomésticos');
     const datos = { cliente, cuentas: { ahorros, corriente, tarjeta } };
     usuarios.push(serializarUsuario(datos));
     guardarTodosLosUsuarios(usuarios);
@@ -208,15 +220,17 @@ export const AppState = {
     };
   },
 
-  registrarUsuario({ identificacion, nombreCompleto, celular, usuario, contrasena }) {
+  registrarUsuario({ identificacion, nombreCompleto, celular, correo, usuario, contrasena }) {
     const usuarios = cargarTodosLosUsuarios();
     if (usuarios.find(u => u.cliente.usuario === usuario))
       throw new Error(`El nombre de usuario "${usuario}" ya está registrado.`);
     if (usuarios.find(u => u.cliente.identificacion === identificacion))
       throw new Error(`La identificación "${identificacion}" ya está registrada.`);
+    if (correo && usuarios.find(u => (u.cliente.correo || '').toLowerCase() === correo.toLowerCase()))
+      throw new Error(`El correo "${correo}" ya está registrado.`);
 
     const hoy = new Date();
-    const cliente   = new Cliente(generarId(), identificacion, nombreCompleto, celular, usuario, contrasena, 0, false);
+    const cliente   = new Cliente(generarId(), identificacion, nombreCompleto, celular, usuario, contrasena, 0, false, correo || '');
     const ahorros   = new CuentaAhorros(generarNumeroCuenta('ahorros'), 0, hoy, EstadoCuenta.ACTIVA);
     const corriente = new CuentaCorriente(generarNumeroCuenta('corriente'), 0, hoy, EstadoCuenta.ACTIVA);
     const tarjeta   = new TarjetaCredito(generarNumeroCuenta('tarjeta'), 5000000, hoy, EstadoCuenta.ACTIVA);
@@ -311,10 +325,15 @@ export const AppState = {
     ].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
   },
 
-  actualizarPerfil(nombreCompleto, celular) {
+  actualizarPerfil(nombreCompleto, celular, correo) {
     _datos.cliente.nombreCompleto = nombreCompleto;
     _datos.cliente.celular = celular;
-    if (_sesionActiva) { _sesionActiva.nombreCompleto = nombreCompleto; _sesionActiva.celular = celular; }
+    if (correo !== undefined) _datos.cliente.correo = correo;
+    if (_sesionActiva) {
+      _sesionActiva.nombreCompleto = nombreCompleto;
+      _sesionActiva.celular = celular;
+      if (correo !== undefined) _sesionActiva.correo = correo;
+    }
     syncEstado();
   },
 
@@ -322,7 +341,66 @@ export const AppState = {
     localStorage.removeItem(LS_USERS);
     localStorage.removeItem(LS_SESSION);
     localStorage.removeItem(LS_ATTEMPTS);
+    localStorage.removeItem(LS_CUPO_DIARIO);
     window.location.reload();
+  },
+
+  /* ─── Cupo diario de transferencias ────────────────────────────────
+   * Persiste por usuario en localStorage. La ventana de tiempo es de
+   * 24 horas: cuando han pasado 24h desde el primer uso, se resetea
+   * automáticamente.
+   * Estructura guardada:
+   *   miplata_cupo_diario = {
+   *     [usuario]: { usado: number, inicioVentana: ISO timestamp }
+   *   }
+   * ───────────────────────────────────────────────────────────────── */
+  getCupoDiario() {
+    if (!_sesionActiva) return { usado: 0, inicioVentana: null, resetEnMs: 0 };
+    const VENTANA_MS = 24 * 60 * 60 * 1000; // 24 horas
+    let store = {};
+    try { store = JSON.parse(localStorage.getItem(LS_CUPO_DIARIO) || '{}'); } catch {}
+    const usuario = _sesionActiva.usuario;
+    const entry = store[usuario];
+    const ahora = Date.now();
+
+    if (!entry || !entry.inicioVentana) {
+      return { usado: 0, inicioVentana: null, resetEnMs: VENTANA_MS };
+    }
+    const inicio = new Date(entry.inicioVentana).getTime();
+    const transcurrido = ahora - inicio;
+    if (transcurrido >= VENTANA_MS) {
+      // Ventana expirada → reset automático
+      delete store[usuario];
+      localStorage.setItem(LS_CUPO_DIARIO, JSON.stringify(store));
+      return { usado: 0, inicioVentana: null, resetEnMs: VENTANA_MS };
+    }
+    return {
+      usado: entry.usado || 0,
+      inicioVentana: entry.inicioVentana,
+      resetEnMs: VENTANA_MS - transcurrido,
+    };
+  },
+
+  agregarCupoDiario(monto) {
+    if (!_sesionActiva) return;
+    let store = {};
+    try { store = JSON.parse(localStorage.getItem(LS_CUPO_DIARIO) || '{}'); } catch {}
+    const usuario = _sesionActiva.usuario;
+    const actual = this.getCupoDiario(); // aplica reset si corresponde
+    const inicio = actual.inicioVentana || new Date().toISOString();
+    store[usuario] = {
+      usado: (actual.usado || 0) + monto,
+      inicioVentana: inicio,
+    };
+    localStorage.setItem(LS_CUPO_DIARIO, JSON.stringify(store));
+  },
+
+  resetCupoDiario() {
+    if (!_sesionActiva) return;
+    let store = {};
+    try { store = JSON.parse(localStorage.getItem(LS_CUPO_DIARIO) || '{}'); } catch {}
+    delete store[_sesionActiva.usuario];
+    localStorage.setItem(LS_CUPO_DIARIO, JSON.stringify(store));
   },
 };
 
@@ -354,7 +432,6 @@ export function buildSidebar(activeId) {
   if (!cliente) return;
   const nav = [
     { id:'dashboard', icon:'⊞', label:'Dashboard',          href:'../GestionDeCuentas/GestionDeCuentas.html' },
-    { id:'cuentas',   icon:'🏛', label:'Cuentas',            href:'../GestionDeCuentas/GestionDeCuentas.html' },
     { id:'tarjeta',   icon:'💳', label:'Tarjeta de Crédito', href:'../TarjetaCredito/TarjetaCredito.html' },
     { id:'transacc',  icon:'↔',  label:'Transacciones',      href:'../Transacciones/Transacciones.html' },
     { id:'historial', icon:'🕐', label:'Historial',           href:'../HistorialDeMovimientos/HistorialDeMovimientos.html' },
@@ -392,10 +469,496 @@ export function buildSidebar(activeId) {
       <button class="nav-item" onclick="window.appLogout()">
         <span class="nav-icon">↩</span> Cerrar Sesión
       </button>
-      <button class="nav-item" onclick="alert('Ayuda próximamente.')">
+      <a href="../Ayuda/Ayuda.html" class="nav-item${activeId === 'ayuda' ? ' active' : ''}">
         <span class="nav-icon">❓</span> Ayuda
-      </button>
+      </a>
     </div>`;
   window.appLogout = () => AppState.cerrarSesion();
   window.AppState  = AppState;
+}
+
+/* ============================================================================
+ * GENERACIÓN DE EXTRACTOS EN PDF
+ * ============================================================================
+ * Usa jsPDF cargado vía CDN. Se carga bajo demanda la primera vez que se
+ * solicita un PDF, para no penalizar la carga inicial del sitio.
+ * ========================================================================== */
+
+const JSPDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const JSPDF_AUTOTABLE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+let _jsPdfLoadingPromise = null;
+
+function _cargarScriptUnaVez(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve(); return;
+    }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+function _cargarJsPDF() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+  if (_jsPdfLoadingPromise) return _jsPdfLoadingPromise;
+  _jsPdfLoadingPromise = _cargarScriptUnaVez(JSPDF_CDN)
+    .then(() => _cargarScriptUnaVez(JSPDF_AUTOTABLE_CDN));
+  return _jsPdfLoadingPromise;
+}
+
+/**
+ * Devuelve la cuenta solicitada por tipo: 'ahorros' | 'corriente' | 'tarjeta'.
+ */
+function _getCuentaPorTipo(tipo) {
+  switch (tipo) {
+    case 'ahorros':   return AppState.getCuentaAhorros();
+    case 'corriente': return AppState.getCuentaCorriente();
+    case 'tarjeta':   return AppState.getTarjetaCredito();
+    default: throw new Error(`Tipo de cuenta no válido: ${tipo}`);
+  }
+}
+
+/**
+ * Filtra los movimientos de una cuenta en un mes/año determinado, en orden ASC.
+ * mes: 1..12 (NO 0..11)
+ */
+export function obtenerMovimientosMes(tipoCuenta, mes, año) {
+  const cuenta = _getCuentaPorTipo(tipoCuenta);
+  if (!cuenta) return [];
+  return cuenta.obtenerMovimientos()
+    .filter(m => {
+      const f = new Date(m.fechaHora);
+      return f.getMonth() + 1 === mes && f.getFullYear() === año;
+    })
+    .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
+}
+
+/**
+ * Calcula el saldo al inicio del mes (antes del primer movimiento del mes).
+ * Si no hay movimientos en el mes, devuelve el saldo actual de la cuenta.
+ */
+export function calcularSaldoInicialMes(tipoCuenta, mes, año) {
+  const cuenta = _getCuentaPorTipo(tipoCuenta);
+  if (!cuenta) return 0;
+  const movs = obtenerMovimientosMes(tipoCuenta, mes, año);
+  if (movs.length === 0) return cuenta.saldo;
+  const primero = movs[0];
+  // El signo del movimiento depende del tipo:
+  // CONSIGNACION / TRANSFERENCIA_IN suman al saldo
+  // RETIRO / TRANSFERENCIA_OUT / COMPRA_TC / PAGO_TC restan (para cuentas de débito)
+  const esIngreso = ['CONSIGNACION', 'TRANSFERENCIA_IN'].includes(primero.tipo);
+  const esPagoTCenTarjeta = primero.tipo === 'PAGO_TC' && tipoCuenta === 'tarjeta';
+  const esCompraEnTC = primero.tipo === 'COMPRA_TC' && tipoCuenta === 'tarjeta';
+  let saldoAntes;
+  if (esCompraEnTC) {
+    // En TC, COMPRA_TC suma a la deuda → saldoPosterior = saldoPrevio + valor
+    saldoAntes = primero.saldoPosterior - primero.valor;
+  } else if (esPagoTCenTarjeta) {
+    // En TC, PAGO_TC resta deuda → saldoPosterior = saldoPrevio - valor
+    saldoAntes = primero.saldoPosterior + primero.valor;
+  } else if (esIngreso) {
+    saldoAntes = primero.saldoPosterior - primero.valor;
+  } else {
+    saldoAntes = primero.saldoPosterior + primero.valor;
+  }
+  return parseFloat(saldoAntes.toFixed(2));
+}
+
+const _NOMBRES_MES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+function _tipoMovLabel(tipo) {
+  return String(tipo || '').replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function _esIngresoParaCuenta(mov, tipoCuenta) {
+  // Determina si el movimiento debe mostrarse como (+) o (-).
+  const esPagoTCenTarjeta = mov.tipo === 'PAGO_TC' && tipoCuenta === 'tarjeta';
+  if (tipoCuenta === 'tarjeta') {
+    // En TC: PAGO_TC reduce deuda (positivo). COMPRA_TC aumenta deuda (negativo en términos de cupo).
+    return esPagoTCenTarjeta;
+  }
+  return ['CONSIGNACION', 'TRANSFERENCIA_IN'].includes(mov.tipo);
+}
+
+function _aplicarHeaderPDF(doc, titulo, cliente, cuenta, periodo, tipoCuenta) {
+  // Banner azul institucional
+  doc.setFillColor(26, 58, 107); // --primary #1A3A6B
+  doc.rect(0, 0, 210, 28, 'F');
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text('Mi Plata', 15, 13);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text('Banca Privada', 15, 19);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(titulo, 195, 13, { align: 'right' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`Generado: ${new Date().toLocaleString('es-CO')}`, 195, 19, { align: 'right' });
+
+  // Datos cliente
+  doc.setTextColor(60, 60, 60);
+  doc.setFontSize(10);
+  let y = 38;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Titular:', 15, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(cliente.nombreCompleto, 35, y);
+
+  y += 6;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Identificación:', 15, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(String(cliente.identificacion), 42, y);
+
+  y += 6;
+  doc.setFont('helvetica', 'bold');
+  const etiquetaCuenta = tipoCuenta === 'tarjeta' ? 'Tarjeta de Crédito:' : `Cuenta ${tipoCuenta === 'ahorros' ? 'de Ahorros' : 'Corriente'}:`;
+  doc.text(etiquetaCuenta, 15, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`•••• ${String(cuenta.numeroCuenta).slice(-4)}`, 60, y);
+
+  y += 6;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Período:', 15, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(periodo, 32, y);
+
+  return y + 6;
+}
+
+function _aplicarFooterPDF(doc) {
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      '© 2026 Mi Plata S.A. — Documento generado automáticamente, sin validez legal.',
+      105, 290, { align: 'center' }
+    );
+    doc.text(`Página ${i} de ${pageCount}`, 195, 290, { align: 'right' });
+  }
+}
+
+/**
+ * Genera y descarga un extracto en PDF para cuenta de Ahorros o Corriente.
+ */
+export async function generarPDFExtractoSimple(tipoCuenta, mes, año) {
+  try {
+    await _cargarJsPDF();
+  } catch (e) {
+    showToast('No se pudo cargar el generador de PDF. Verifica tu conexión.', 'error');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const cliente = AppState.getClienteActivo();
+  const cuenta  = _getCuentaPorTipo(tipoCuenta);
+  if (!cliente || !cuenta) {
+    showToast('No se pudo generar el extracto: datos no disponibles.', 'error');
+    return;
+  }
+
+  const movs = obtenerMovimientosMes(tipoCuenta, mes, año);
+  const saldoInicial = calcularSaldoInicialMes(tipoCuenta, mes, año);
+  const saldoFinal   = movs.length > 0 ? movs[movs.length - 1].saldoPosterior : cuenta.saldo;
+
+  let totalIngresos = 0;
+  let totalEgresos  = 0;
+  movs.forEach(m => {
+    if (_esIngresoParaCuenta(m, tipoCuenta)) totalIngresos += m.valor;
+    else totalEgresos += m.valor;
+  });
+
+  const periodo = `${_NOMBRES_MES[mes - 1]} ${año}`;
+  const tipoLabel = tipoCuenta === 'ahorros' ? 'CUENTA DE AHORROS' : 'CUENTA CORRIENTE';
+
+  const doc = new jsPDF();
+  let cursorY = _aplicarHeaderPDF(doc, `EXTRACTO ${tipoLabel}`, cliente, cuenta, periodo, tipoCuenta);
+
+  // Sección Resumen
+  cursorY += 4;
+  doc.setFillColor(241, 245, 249);
+  doc.rect(15, cursorY, 180, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(26, 58, 107);
+  doc.text('RESUMEN DEL PERÍODO', 17, cursorY + 5.5);
+  cursorY += 12;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(60, 60, 60);
+  const filas = [
+    ['Saldo Inicial:',  formatCurrency(saldoInicial)],
+    ['Total Ingresos:', `+ ${formatCurrency(totalIngresos)}`],
+    ['Total Egresos:',  `- ${formatCurrency(totalEgresos)}`],
+    ['Saldo Final:',    formatCurrency(saldoFinal)],
+  ];
+  filas.forEach(([label, valor]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.text(label, 20, cursorY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(valor, 100, cursorY);
+    cursorY += 6;
+  });
+
+  cursorY += 4;
+
+  // Sección de movimientos
+  if (movs.length === 0) {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Sin movimientos registrados en este período.', 15, cursorY + 6);
+  } else {
+    doc.autoTable({
+      startY: cursorY,
+      head: [['Fecha', 'Tipo', 'Descripción', 'Valor', 'Saldo']],
+      body: movs.map(m => {
+        const esIngreso = _esIngresoParaCuenta(m, tipoCuenta);
+        return [
+          new Date(m.fechaHora).toLocaleDateString('es-CO'),
+          _tipoMovLabel(m.tipo),
+          m.descripcion || '-',
+          `${esIngreso ? '+' : '-'} ${formatCurrency(m.valor)}`,
+          formatCurrency(m.saldoPosterior),
+        ];
+      }),
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [26, 58, 107], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 24 },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 70 },
+        3: { cellWidth: 30, halign: 'right' },
+        4: { cellWidth: 28, halign: 'right' },
+      },
+      margin: { left: 15, right: 15 },
+    });
+  }
+
+  _aplicarFooterPDF(doc);
+
+  const nombreArchivo = `Extracto-${tipoCuenta}-${String(mes).padStart(2,'0')}-${año}.pdf`;
+  doc.save(nombreArchivo);
+  showToast(`Extracto descargado: ${nombreArchivo}`, 'success');
+}
+
+/**
+ * Genera y descarga un extracto en PDF completo para Tarjeta de Crédito:
+ * incluye resumen, tabla de amortización, compras y movimientos del mes.
+ */
+export async function generarPDFTarjetaCredito(mes, año) {
+  try {
+    await _cargarJsPDF();
+  } catch (e) {
+    showToast('No se pudo cargar el generador de PDF. Verifica tu conexión.', 'error');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const cliente = AppState.getClienteActivo();
+  const tc = AppState.getTarjetaCredito();
+  if (!cliente || !tc) {
+    showToast('No se pudo generar el extracto: datos no disponibles.', 'error');
+    return;
+  }
+
+  const periodo = `${_NOMBRES_MES[mes - 1]} ${año}`;
+  const doc = new jsPDF();
+  let cursorY = _aplicarHeaderPDF(doc, 'EXTRACTO TARJETA DE CRÉDITO', cliente, tc, periodo, 'tarjeta');
+
+  // ============ Sección 1: Resumen de crédito ============
+  cursorY += 4;
+  doc.setFillColor(241, 245, 249);
+  doc.rect(15, cursorY, 180, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(26, 58, 107);
+  doc.text('RESUMEN DE CRÉDITO', 17, cursorY + 5.5);
+  cursorY += 12;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(60, 60, 60);
+  const usadoPct = tc.cupo > 0 ? ((tc.deuda / tc.cupo) * 100).toFixed(1) : '0.0';
+  const resumen = [
+    ['Límite de Crédito:',  formatCurrency(tc.cupo)],
+    ['Deuda Actual:',       formatCurrency(tc.deuda)],
+    ['Cupo Disponible:',    formatCurrency(tc.cupoDisponible)],
+    ['Utilización:',        `${usadoPct} %`],
+    ['Próxima Cuota Total:', formatCurrency(tc.proximaCuotaTotal)],
+    ['Cuotas Pendientes:',  String(tc.cuotasPendientesTotales)],
+  ];
+  resumen.forEach(([label, valor]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.text(label, 20, cursorY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(valor, 100, cursorY);
+    cursorY += 6;
+  });
+  cursorY += 4;
+
+  // ============ Sección 2: Tabla de Amortización ============
+  const activas = tc.comprasActivas;
+  if (activas.length > 0) {
+    doc.setFillColor(241, 245, 249);
+    doc.rect(15, cursorY, 180, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(26, 58, 107);
+    doc.text('TABLA DE AMORTIZACIÓN — PRÓXIMAS CUOTAS', 17, cursorY + 5.5);
+    cursorY += 12;
+
+    // Calculamos siguientes cuotas a pagar para cada compra activa
+    const filasAmort = [];
+    activas.forEach(c => {
+      const cuotasFaltantes = c.cuotasTotales - c.cuotasPagadas;
+      // Mostramos hasta las próximas 3 cuotas de cada compra
+      const cuotasMostrar = Math.min(cuotasFaltantes, 3);
+      const interesPorCuota = parseFloat((c.cuotaMensual - c.capitalPorCuota).toFixed(2));
+      for (let i = 1; i <= cuotasMostrar; i++) {
+        const numCuota = c.cuotasPagadas + i;
+        filasAmort.push([
+          c.descripcion || 'Compra',
+          `${numCuota}/${c.cuotasTotales}`,
+          formatCurrency(c.cuotaMensual),
+          formatCurrency(c.capitalPorCuota),
+          formatCurrency(interesPorCuota),
+        ]);
+      }
+    });
+
+    doc.autoTable({
+      startY: cursorY,
+      head: [['Compra', 'Cuota', 'Cuota Mensual', 'Capital', 'Interés']],
+      body: filasAmort,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [26, 58, 107], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 60 },
+        1: { cellWidth: 20, halign: 'center' },
+        2: { cellWidth: 35, halign: 'right' },
+        3: { cellWidth: 32, halign: 'right' },
+        4: { cellWidth: 30, halign: 'right' },
+      },
+      margin: { left: 15, right: 15 },
+    });
+    cursorY = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ============ Sección 3: Compras a Crédito ============
+  if (tc.compras && tc.compras.length > 0) {
+    if (cursorY > 240) { doc.addPage(); cursorY = 20; }
+    doc.setFillColor(241, 245, 249);
+    doc.rect(15, cursorY, 180, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(26, 58, 107);
+    doc.text('COMPRAS A CRÉDITO', 17, cursorY + 5.5);
+    cursorY += 12;
+
+    doc.autoTable({
+      startY: cursorY,
+      head: [['Descripción', 'Monto', 'Plazo', 'Cuota', 'Estado', 'Saldo']],
+      body: tc.compras.map(c => [
+        c.descripcion || 'Compra',
+        formatCurrency(c.montoOriginal),
+        `${c.cuotasPagadas}/${c.cuotasTotales}`,
+        formatCurrency(c.cuotaMensual),
+        c.estado === 'pagada' ? 'Pagada' : 'Activa',
+        formatCurrency(c.saldoPendiente),
+      ]),
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [26, 58, 107], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 50 },
+        1: { cellWidth: 28, halign: 'right' },
+        2: { cellWidth: 18, halign: 'center' },
+        3: { cellWidth: 30, halign: 'right' },
+        4: { cellWidth: 22, halign: 'center' },
+        5: { cellWidth: 30, halign: 'right' },
+      },
+      margin: { left: 15, right: 15 },
+    });
+    cursorY = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ============ Sección 4: Movimientos del Mes ============
+  const movs = obtenerMovimientosMes('tarjeta', mes, año);
+  if (cursorY > 240) { doc.addPage(); cursorY = 20; }
+  doc.setFillColor(241, 245, 249);
+  doc.rect(15, cursorY, 180, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(26, 58, 107);
+  doc.text(`MOVIMIENTOS DEL PERÍODO — ${periodo.toUpperCase()}`, 17, cursorY + 5.5);
+  cursorY += 12;
+
+  if (movs.length === 0) {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Sin movimientos registrados en este período.', 15, cursorY + 6);
+  } else {
+    doc.autoTable({
+      startY: cursorY,
+      head: [['Fecha', 'Tipo', 'Descripción', 'Valor', 'Deuda']],
+      body: movs.map(m => {
+        const esIngreso = _esIngresoParaCuenta(m, 'tarjeta');
+        return [
+          new Date(m.fechaHora).toLocaleDateString('es-CO'),
+          _tipoMovLabel(m.tipo),
+          m.descripcion || '-',
+          `${esIngreso ? '-' : '+'} ${formatCurrency(m.valor)}`,
+          formatCurrency(m.saldoPosterior),
+        ];
+      }),
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [26, 58, 107], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 24 },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 70 },
+        3: { cellWidth: 30, halign: 'right' },
+        4: { cellWidth: 28, halign: 'right' },
+      },
+      margin: { left: 15, right: 15 },
+    });
+    cursorY = doc.lastAutoTable.finalY + 8;
+  }
+
+  // ============ Footer informativo ============
+  if (cursorY > 270) { doc.addPage(); cursorY = 20; }
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.setFont('helvetica', 'italic');
+  const fechaPagoMin = new Date(año, mes, 5).toLocaleDateString('es-CO');
+  doc.text(`Recordatorio: el pago mínimo sugerido vence el ${fechaPagoMin}.`, 15, cursorY + 6);
+  doc.text(`Cuota total a pagar este mes: ${formatCurrency(tc.proximaCuotaTotal)}`, 15, cursorY + 12);
+
+  _aplicarFooterPDF(doc);
+
+  const nombreArchivo = `Extracto-TC-${String(mes).padStart(2,'0')}-${año}.pdf`;
+  doc.save(nombreArchivo);
+  showToast(`Extracto descargado: ${nombreArchivo}`, 'success');
 }

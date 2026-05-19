@@ -5,6 +5,7 @@ const state = {
   nombreCompleto: '',
   identificacion: '',
   celular: '',
+  correo: '',
   usuario: '',
   contrasena: '',
 };
@@ -21,6 +22,7 @@ const line2    = document.getElementById('line2');
 const inNombre  = document.getElementById('nombreCompleto');
 const inId      = document.getElementById('identificacion');
 const inCelular = document.getElementById('celular');
+const inCorreo  = document.getElementById('correo');
 
 const inUsuario  = document.getElementById('usuario');
 const inPass     = document.getElementById('contrasena');
@@ -58,20 +60,25 @@ function validarPaso1() {
   const nombre = inNombre.value.trim();
   const id     = inId.value.trim();
   const cel    = inCelular.value.trim();
+  const correo = inCorreo.value.trim();
 
   const okNombre  = nombre.length >= 3;
   const okId      = id.length >= 5 && /^[\d\-]+$/.test(id);
   const okCelular = cel.length >= 7;
+  // Validación de correo: formato básico aaa@bbb.ccc
+  const okCorreo  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 
   marcarCampo(inNombre,  okNombre);
   marcarCampo(inId,      okId);
   marcarCampo(inCelular, okCelular);
+  marcarCampo(inCorreo,  okCorreo);
 
   mostrarError('errNombre',  !okNombre);
   mostrarError('errId',      !okId);
   mostrarError('errCelular', !okCelular);
+  mostrarError('errCorreo',  !okCorreo);
 
-  return okNombre && okId && okCelular;
+  return okNombre && okId && okCelular && okCorreo;
 }
 
 function validarPaso2() {
@@ -149,6 +156,7 @@ function rellenarResumen() {
   document.getElementById('resNombre').textContent  = state.nombreCompleto;
   document.getElementById('resId').textContent      = state.identificacion;
   document.getElementById('resCelular').textContent = state.celular;
+  document.getElementById('resCorreo').textContent  = state.correo;
   document.getElementById('resUsuario').textContent = `@${state.usuario}`;
 }
 
@@ -162,6 +170,7 @@ document.getElementById('btnPaso1').addEventListener('click', () => {
   state.nombreCompleto = inNombre.value.trim();
   state.identificacion = inId.value.trim();
   state.celular        = inCelular.value.trim();
+  state.correo         = inCorreo.value.trim();
   irAPaso(2);
   inUsuario.focus();
 });
@@ -187,6 +196,7 @@ document.getElementById('btnRegistrar').addEventListener('click', () => {
         identificacion: state.identificacion,
         nombreCompleto: state.nombreCompleto,
         celular:        state.celular,
+        correo:         state.correo,
         usuario:        state.usuario,
         contrasena:     state.contrasena,
       });
@@ -214,7 +224,7 @@ document.getElementById('btnRegistrar').addEventListener('click', () => {
   }, 600);
 });
 
-[inNombre, inId, inCelular].forEach(inp => {
+[inNombre, inId, inCelular, inCorreo].forEach(inp => {
   inp.addEventListener('input', () => inp.classList.remove('error'));
 });
 
