@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <style>
     .perfil-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    @media (max-width: 768px) {
+      .perfil-grid { grid-template-columns:1fr; gap:16px; }
+    }
     .data-row { padding:14px 0; border-bottom:1px solid var(--gray-100); }
     .data-row:last-child { border-bottom:none; }
     .data-key { font-size:.72rem; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }

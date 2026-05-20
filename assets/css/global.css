@@ -143,6 +143,7 @@ body {
 .main-content {
   margin-left: var(--sidebar-w);
   flex: 1;
+  min-width: 0;        /* permite que el flex item se encoja en lugar de desbordar */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -414,11 +415,98 @@ body {
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 
+/* ── Barra de navegación inferior (móvil) ── */
+.bottom-nav {
+  display: none;                /* Oculta en escritorio; se activa en el media query */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: var(--gray-400);
+  font-size: 0.65rem;
+  font-weight: 600;
+  transition: color 0.15s;
+  padding: 6px 2px;
+}
+.bottom-nav-item .bottom-nav-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.bottom-nav-item .bottom-nav-label {
+  letter-spacing: 0.2px;
+}
+.bottom-nav-item.active {
+  color: var(--accent);
+}
+.bottom-nav-item.active .bottom-nav-icon {
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
+  /* Layout base */
+  .sidebar { display: none; }
   .main-content { margin-left: 0; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .page-content { padding: 16px; }
+  .page-content { padding: 16px 16px 80px; }   /* espacio extra para la bottom-nav */
+
+  /* Activar barra inferior */
+  .bottom-nav { display: flex; }
+
+  /* Topbar compacta */
+  .topbar { padding: 0 16px; }
+  .topbar nav { display: none !important; }   /* navegación redundante con la barra inferior (gana sobre estilo inline) */
+  .topbar-search { min-width: 0 !important; flex: 1; }
+  .topbar-actions { gap: 8px; flex-shrink: 1; min-width: 0; }
+  .topbar-actions .topbar-search { display: none !important; }  /* buscador decorativo de Perfil */
+  .btn-logout { padding: 7px 12px; font-size: 0.78rem; }
+
+  /* Títulos de página más pequeños */
+  .page-title { font-size: 1.4rem; }
+  .page-header { margin-bottom: 18px; }
+
+  /* Modales a ancho casi completo */
+  .modal-card { width: 92%; max-width: 420px; padding: 22px; }
+
+  /* Tablas con scroll horizontal dentro de su card */
+  .card { overflow-x: auto; }
+  .data-table { min-width: 520px; }
+
+  /* Footer apilado y sin quedar tapado por la barra inferior */
+  .page-footer {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    padding: 18px 16px;
+    margin-bottom: 60px;
+  }
+  .footer-links { flex-wrap: wrap; justify-content: center; gap: 12px; }
+
+  /* Header público responsive */
+  .public-header { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+  .public-header-nav { gap: 12px; flex-wrap: wrap; }
+  .public-header-nav a { font-size: 0.8rem; }
+}
+
+/* Pantallas muy pequeñas (teléfonos angostos) */
+@media (max-width: 400px) {
+  .bottom-nav-item { font-size: 0.6rem; }
+  .bottom-nav-item .bottom-nav-icon { font-size: 1.1rem; }
+  .page-title { font-size: 1.25rem; }
 }
 
 /* ── Modo público: páginas accesibles sin sesión iniciada ── */

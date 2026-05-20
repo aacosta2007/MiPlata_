@@ -22,6 +22,12 @@
       gap: 16px;
       margin-bottom: 32px;
     }
+    @media (max-width: 900px) {
+      .ayuda-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .ayuda-grid { grid-template-columns: 1fr; }
+    }
     .ayuda-card {
       background: var(--white);
       border-radius: var(--radius-md);

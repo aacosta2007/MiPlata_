@@ -31,6 +31,19 @@
       font-family:var(--font-main); font-size:.875rem; font-weight:600; color:var(--gray-600);
     }
     .load-more-btn:hover { background:var(--gray-200); }
+
+    @media (max-width: 768px) {
+      /* Filtros con scroll horizontal para que no desborden */
+      .filter-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        margin-bottom: 0;
+      }
+      .tab-btn { white-space: nowrap; flex-shrink: 0; }
+      /* Selectores de mes/año + exportar a ancho completo */
+      #mesSelector, #añoSelector { flex: 1; min-width: 0; }
+    }
   </style>
 </head>
 <body>

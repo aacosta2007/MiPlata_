@@ -26,6 +26,10 @@
       gap: 16px;
       margin-bottom: 32px;
     }
+    @media (max-width: 640px) {
+      .seg-grid { grid-template-columns: 1fr; }
+      .seg-hero { flex-direction: column; text-align: center; gap: 12px; }
+    }
     .seg-feature {
       background: var(--white);
       border-radius: var(--radius-md);
