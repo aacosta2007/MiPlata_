@@ -160,3 +160,27 @@
 }
 
 .modal-close:hover { background: var(--gray-200); }
+
+/* ── Responsive móvil ── */
+@media (max-width: 768px) {
+  /* Header: saludo arriba, botones de acción abajo a ancho completo */
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .dashboard-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .dashboard-actions .btn {
+    padding: 10px 6px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Botones de acción apilados en pantallas muy angostas */
+  .dashboard-actions { grid-template-columns: 1fr; }
+}

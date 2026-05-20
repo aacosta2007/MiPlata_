@@ -431,11 +431,11 @@ export function buildSidebar(activeId) {
   const cliente = AppState.getClienteActivo();
   if (!cliente) return;
   const nav = [
-    { id:'dashboard', icon:'⊞', label:'Dashboard',          href:'../GestionDeCuentas/GestionDeCuentas.html' },
-    { id:'tarjeta',   icon:'💳', label:'Tarjeta de Crédito', href:'../TarjetaCredito/TarjetaCredito.html' },
-    { id:'transacc',  icon:'↔',  label:'Transacciones',      href:'../Transacciones/Transacciones.html' },
-    { id:'historial', icon:'🕐', label:'Historial',           href:'../HistorialDeMovimientos/HistorialDeMovimientos.html' },
-    { id:'perfil',    icon:'👤', label:'Perfil',              href:'../PerfilSeguridad/PerfilSeguridad.html' },
+    { id:'dashboard', icon:'⊞', label:'Dashboard',          short:'Inicio',      href:'../GestionDeCuentas/GestionDeCuentas.html' },
+    { id:'tarjeta',   icon:'💳', label:'Tarjeta de Crédito', short:'Tarjeta',     href:'../TarjetaCredito/TarjetaCredito.html' },
+    { id:'transacc',  icon:'↔',  label:'Transacciones',      short:'Transferir',  href:'../Transacciones/Transacciones.html' },
+    { id:'historial', icon:'🕐', label:'Historial',          short:'Historial',   href:'../HistorialDeMovimientos/HistorialDeMovimientos.html' },
+    { id:'perfil',    icon:'👤', label:'Perfil',             short:'Perfil',      href:'../PerfilSeguridad/PerfilSeguridad.html' },
   ];
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
@@ -475,6 +475,27 @@ export function buildSidebar(activeId) {
     </div>`;
   window.appLogout = () => AppState.cerrarSesion();
   window.AppState  = AppState;
+
+  _buildBottomNav(activeId, nav);
+}
+
+/**
+ * Construye e inyecta la barra de navegación inferior para móvil.
+ * Se inserta una sola vez en el <body>; en pantallas grandes queda oculta vía CSS.
+ */
+function _buildBottomNav(activeId, nav) {
+  let bottomNav = document.getElementById('bottomNav');
+  if (!bottomNav) {
+    bottomNav = document.createElement('nav');
+    bottomNav.id = 'bottomNav';
+    bottomNav.className = 'bottom-nav';
+    document.body.appendChild(bottomNav);
+  }
+  bottomNav.innerHTML = nav.map(item => `
+    <a href="${item.href}" class="bottom-nav-item${item.id === activeId ? ' active' : ''}" data-page="${item.id}">
+      <span class="bottom-nav-icon">${item.icon}</span>
+      <span class="bottom-nav-label">${item.short}</span>
+    </a>`).join('');
 }
 
 /* ============================================================================

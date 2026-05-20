@@ -316,3 +316,10 @@
   .login-main { grid-template-columns: 1fr; padding: 20px; }
   .login-hero  { display: none; }
 }
+
+@media (max-width: 560px) {
+  .login-header { padding: 0 16px; }
+  .login-nav { display: none; }
+  .login-main { padding: 16px; }
+  .login-footer { grid-template-columns: 1fr; gap: 20px; padding: 32px 20px; }
+}

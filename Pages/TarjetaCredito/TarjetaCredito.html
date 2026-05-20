@@ -7,6 +7,16 @@
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <style>
     .sim-grid { display:grid; grid-template-columns:380px 1fr; gap:24px; }
+
+    @media (max-width: 768px) {
+      .sim-grid    { grid-template-columns:1fr; }
+      .tc-summary  { grid-template-columns:repeat(2, 1fr) !important; }
+      .compra-grid { grid-template-columns:1fr !important; }
+      .page-header { flex-direction:column; align-items:flex-start !important; gap:12px; }
+    }
+    @media (max-width: 400px) {
+      .tc-summary  { grid-template-columns:1fr !important; }
+    }
     .tasa-badge {
       background:#EFF6FF; border:1px solid #BFDBFE;
       border-radius:var(--radius-md); padding:6px 14px;
