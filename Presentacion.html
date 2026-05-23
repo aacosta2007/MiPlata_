@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mi Plata — Presentación del Proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary:  #1A3A6B;
+    --accent:   #2563EB;
+    --success:  #16A34A;
+    --warning:  #D97706;
+    --error:    #DC2626;
+    --ink:      #0F172A;
+    --gray:     #64748B;
+    --light:    #F8FAFC;
+    --font:     'DM Sans', sans-serif;
+    --mono:     'DM Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font);
+    background: #0B1220;
+    color: var(--ink);
+    overflow: hidden;
+  }
+
+  /* ── Contenedor de slides ── */
+  .deck { position: relative; width: 100%; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 56px 78px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(24px);
+    transition: opacity .45s ease, transform .45s ease, visibility .45s;
+    background: var(--light);
+    text-align: center;
+    overflow-y: auto;
+  }
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* ── Slide de portada / cierre (oscuro) ── */
+  .slide.dark {
+    background: linear-gradient(135deg, #1A3A6B 0%, #16213E 55%, #0F3460 100%);
+    color: #fff;
+  }
+  .slide.dark .kicker { color: #93C5FD; }
+  .slide.dark .slide-title { color: #fff; }
+  .slide.dark .slide-text { color: rgba(255,255,255,.8); }
+
+  /* ── Tipografía de slide ── */
+  .kicker {
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .slide-emoji { font-size: 3.2rem; line-height: 1; margin-bottom: 12px; }
+  .slide-title {
+    font-size: 2.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -1px;
+    line-height: 1.15;
+    max-width: 16ch;
+  }
+  .slide-text {
+    font-size: 1.05rem;
+    color: var(--gray);
+    max-width: 60ch;
+    line-height: 1.6;
+    margin-top: 14px;
+  }
+  .highlight { color: var(--accent); font-weight: 700; }
+
+  /* ── Marca de portada ── */
+  .brand {
+    font-size: 3.4rem;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: #fff;
+  }
+  .brand-sub {
+    font-size: .9rem;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #93C5FD;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+  .authors {
+    margin-top: 28px;
+    font-size: .92rem;
+    color: rgba(255,255,255,.65);
+    line-height: 1.8;
+  }
+  .authors strong { color: #fff; font-weight: 500; }
+
+  /* ── Grid de tarjetas dentro de un slide ── */
+  .card-row {
+    display: flex;
+    gap: 18px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .feature {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 18px 20px;
+    width: 232px;
+    box-shadow: 0 8px 26px rgba(15,23,42,.06);
+    text-align: left;
+  }
+  .feature .f-icon { font-size: 1.9rem; }
+  .feature .f-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 9px 0 5px;
+  }
+  .feature .f-desc { font-size: .87rem; color: var(--gray); line-height: 1.5; }
+
+  /* tarjetas de cuenta */
+  .acct {
+    width: 250px;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: left;
+    color: #fff;
+  }
+  .acct.ahorro    { background: linear-gradient(135deg,#16A34A,#15803D); }
+  .acct.corriente { background: linear-gradient(135deg,#1A3A6B,#2563EB); }
+  .acct.credito   { background: linear-gradient(135deg,#1a1a2e,#0f3460); }
+  .acct .a-emoji  { font-size: 1.8rem; }
+  .acct .a-name   { font-size: 1.08rem; font-weight: 700; margin: 8px 0 6px; }
+  .acct .a-desc   { font-size: .83rem; opacity: .85; line-height: 1.5; }
+
+  /* lista de funciones */
+  .feat-list {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 11px 36px;
+    text-align: left;
+    max-width: 720px;
+  }
+  .feat-list li {
+    list-style: none;
+    font-size: 1.02rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .feat-list li .chk {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #DCFCE7;
+    color: var(--success);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* chips de tecnología */
+  .tech-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    justify-content: center; margin-top: 24px; max-width: 760px;
+  }
+  .tech {
+    background: #fff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex; align-items: center; gap: 9px;
+  }
+
+  /* diagrama de arquitectura */
+  .arch {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 620px;
+  }
+  .arch-layer {
+    border-radius: 12px;
+    padding: 11px 20px;
+    text-align: left;
+    border: 1px solid #E2E8F0;
+    background: #fff;
+  }
+  .arch-layer .l-name { font-weight: 700; color: var(--primary); font-size: .96rem; }
+  .arch-layer .l-desc { font-size: .82rem; color: var(--gray); margin-top: 2px; }
+  .arch-arrow { color: var(--accent); font-size: 1rem; line-height: 1; }
+
+  /* estadísticas */
+  .stats {
+    display: flex; gap: 44px; margin-top: 28px; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat .s-num {
+    font-size: 2.5rem; font-weight: 700; color: var(--accent);
+    font-family: var(--mono);
+  }
+  .stat .s-lbl { font-size: .88rem; color: var(--gray); margin-top: 2px; }
+  .slide.dark .stat .s-num { color: #93C5FD; }
+  .slide.dark .stat .s-lbl { color: rgba(255,255,255,.7); }
+
+  /* mockup de móvil */
+  .phone {
+    margin-top: 18px;
+    width: 188px; height: 320px;
+    border-radius: 28px;
+    background: #fff;
+    border: 7px solid #1A3A6B;
+    box-shadow: 0 20px 50px rgba(15,23,42,.25);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    text-align: left;
+    flex-shrink: 0;
+  }
+  .phone-top { background: var(--light); padding: 14px; flex: 1; }
+  .phone-card {
+    background: #fff; border:1px solid #E2E8F0; border-radius: 12px;
+    padding: 12px; margin-bottom: 10px;
+  }
+  .phone-card .pc-lbl { font-size: .5rem; letter-spacing:1px; color: var(--gray); font-weight:700; text-transform:uppercase; }
+  .phone-card .pc-val { font-size: .95rem; font-weight: 700; color: var(--ink); font-family: var(--mono); margin-top:3px; }
+  .phone-nav {
+    display: flex; background: #fff; border-top: 1px solid #E2E8F0;
+    height: 46px;
+  }
+  .phone-nav span {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .phone-nav span.on { color: var(--accent); }
+  .phone-nav span:not(.on) { opacity: .35; }
+
+  /* ── Controles de navegación ── */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(37,99,235,.92);
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, transform .15s;
+    box-shadow: 0 6px 18px rgba(37,99,235,.4);
+  }
+  .nav-btn:hover { background: var(--primary); }
+  .nav-btn:active { transform: translateY(-50%) scale(.92); }
+  .nav-btn:disabled { opacity: .25; cursor: default; }
+  #prevBtn { left: 24px; }
+  #nextBtn { right: 24px; }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: var(--accent);
+    z-index: 60;
+    transition: width .4s ease;
+  }
+
+  .counter {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    background: rgba(15,23,42,.85);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 600;
+    font-family: var(--mono);
+    padding: 7px 16px;
+    border-radius: 999px;
+  }
+  .dots {
+    position: fixed;
+    bottom: 22px; right: 26px;
+    z-index: 50;
+    display: flex; gap: 7px;
+  }
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #CBD5E1;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+  }
+  .dot.active { background: var(--accent); transform: scale(1.35); }
+
+  .hint {
+    position: fixed;
+    bottom: 24px; left: 26px;
+    z-index: 50;
+    font-size: .76rem;
+    color: var(--gray);
+  }
+  .slide.dark ~ .hint { color: #fff; }
+
+  @media (max-width: 720px) {
+    .slide { padding: 40px 22px 92px; }
+    .slide-title { font-size: 1.9rem; }
+    .brand { font-size: 2.8rem; }
+    .slide-text { font-size: 1rem; }
+    .feat-list { grid-template-columns: 1fr; }
+    .nav-btn { width: 42px; height: 42px; }
+    #prevBtn { left: 10px; } #nextBtn { right: 10px; }
+    .dots { display: none; }
+    .stats { gap: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · PORTADA -->
+  <section class="slide dark active">
+    <div class="brand">Mi Plata</div>
+    <div class="brand-sub">Banca Privada Virtual</div>
+    <p class="slide-text" style="margin-top:26px;">
+      Una plataforma de banca en línea donde puedes gestionar tus cuentas,
+      mover tu dinero y controlar tu crédito — todo desde el navegador.
+    </p>
+    <div class="authors">
+      <strong>Proyecto Front-End</strong><br>
+      Adrian Alejandro Acosta Saavedra<br>
+      Williams David Amaiz Fernández
+    </div>
+  </section>
+
+  <!-- 2 · QUÉ ES -->
+  <section class="slide">
+    <div class="kicker">El proyecto</div>
+    <div class="slide-emoji">🏦</div>
+    <h1 class="slide-title">¿Qué es Mi Plata?</h1>
+    <p class="slide-text">
+      Es un <span class="highlight">cajero electrónico simulado</span>: un portal de banca
+      privada que imita cómo funciona un banco real. El usuario se registra, inicia sesión
+      y opera con productos financieros de forma <span class="highlight">segura y visual</span>,
+      sin necesidad de dinero real.
+    </p>
+  </section>
+
+  <!-- 3 · PRODUCTOS -->
+  <section class="slide">
+    <div class="kicker">Productos</div>
+    <h1 class="slide-title">Tres cuentas para cada cliente</h1>
+    <p class="slide-text">Al registrarse, cada usuario recibe automáticamente:</p>
+    <div class="card-row">
+      <div class="acct ahorro">
+        <div class="a-emoji">🐷</div>
+        <div class="a-name">Cuenta de Ahorros</div>
+        <div class="a-desc">Para guardar dinero. Los retiros tienen un costo del 1.5% de interés.</div>
+      </div>
+      <div class="acct corriente">
+        <div class="a-emoji">💼</div>
+        <div class="a-name">Cuenta Corriente</div>
+        <div class="a-desc">Permite gastar hasta un 20% más del saldo gracias al sobregiro.</div>
+      </div>
+      <div class="acct credito">
+        <div class="a-emoji">💳</div>
+        <div class="a-name">Tarjeta de Crédito</div>
+        <div class="a-desc">Cupo de $5.000.000 para comprar a crédito en cuotas mensuales.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · FUNCIONES -->
+  <section class="slide">
+    <div class="kicker">Funcionalidades</div>
+    <h1 class="slide-title">¿Qué puede hacer el usuario?</h1>
+    <ul class="feat-list">
+      <li><span class="chk">✓</span> Consignar y retirar dinero</li>
+      <li><span class="chk">✓</span> Transferir entre sus cuentas</li>
+      <li><span class="chk">✓</span> Enviar dinero a otros usuarios</li>
+      <li><span class="chk">✓</span> Comprar a crédito en cuotas</li>
+      <li><span class="chk">✓</span> Pagar las cuotas de su tarjeta</li>
+      <li><span class="chk">✓</span> Consultar su historial de movimientos</li>
+      <li><span class="chk">✓</span> Descargar extractos en PDF</li>
+      <li><span class="chk">✓</span> Editar su perfil y contraseña</li>
+    </ul>
+  </section>
+
+  <!-- 5 · TARJETA DE CRÉDITO -->
+  <section class="slide">
+    <div class="kicker">A profundidad</div>
+    <div class="slide-emoji">💳</div>
+    <h1 class="slide-title">Crédito con cuotas reales</h1>
+    <p class="slide-text">
+      La tarjeta usa un <span class="highlight">sistema de amortización</span> como el de un banco real.
+      La tasa de interés depende del plazo elegido:
+    </p>
+    <div class="card-row">
+      <div class="feature">
+        <div class="f-icon">🟢</div>
+        <div class="f-title">1 – 2 cuotas</div>
+        <div class="f-desc">Sin interés. Tasa del 0%.</div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">🟠</div>
+        <div class="f-title">3 – 6 cuotas</div>
+        <div class="f-desc">Interés del 1.9% mensual.</div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">🔴</div>
+        <div class="f-title">7 o más cuotas</div>
+        <div class="f-desc">Interés del 2.3% mensual.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · SEGURIDAD -->
+  <section class="slide">
+    <div class="kicker">Protección</div>
+    <h1 class="slide-title">Seguridad en cada operación</h1>
+    <div class="card-row">
+      <div class="feature">
+        <div class="f-icon">🔒</div>
+        <div class="f-title">Bloqueo de cuenta</div>
+        <div class="f-desc">Tras 3 intentos fallidos de inicio de sesión, la cuenta se bloquea.</div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">📊</div>
+        <div class="f-title">Cupo diario</div>
+        <div class="f-desc">Límite de $5.000.000 en transferencias por día, con reinicio cada 24 horas.</div>
+      </div>
+      <div class="feature">
+        <div class="f-icon">🛡️</div>
+        <div class="f-title">Validaciones</div>
+        <div class="f-desc">Cada operación valida fondos y datos antes de ejecutarse.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · EXTRACTOS E HISTORIAL -->
+  <section class="slide">
+    <div class="kicker">Información clara</div>
+    <div class="slide-emoji">📄</div>
+    <h1 class="slide-title">Extractos e historial</h1>
+    <p class="slide-text">
+      Todos los movimientos quedan registrados. El usuario puede
+      <span class="highlight">buscar por fecha o texto</span>, filtrar por cuenta y
+      <span class="highlight">descargar su extracto mensual en PDF</span> — igual que un banco real.
+    </p>
+  </section>
+
+  <!-- 8 · TECNOLOGÍAS -->
+  <section class="slide">
+    <div class="kicker">¿Cómo está hecha?</div>
+    <h1 class="slide-title">Tecnologías utilizadas</h1>
+    <p class="slide-text">
+      Construida con tecnologías web puras, <span class="highlight">sin frameworks</span>,
+      para demostrar dominio de los fundamentos.
+    </p>
+    <div class="tech-row">
+      <div class="tech">🟧 HTML5</div>
+      <div class="tech">🟦 CSS3</div>
+      <div class="tech">🟨 JavaScript (ES2022)</div>
+      <div class="tech">📦 Módulos nativos</div>
+      <div class="tech">💾 localStorage</div>
+      <div class="tech">📄 jsPDF</div>
+    </div>
+  </section>
+
+  <!-- 9 · ARQUITECTURA -->
+  <section class="slide">
+    <div class="kicker">Estructura</div>
+    <h1 class="slide-title">Organización del proyecto</h1>
+    <div class="arch">
+      <div class="arch-layer">
+        <div class="l-name">🖼️ Páginas (UI)</div>
+        <div class="l-desc">Login, registro, dashboard, transacciones, tarjeta, historial, perfil…</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="l-name">⚙️ AppState — Estado global</div>
+        <div class="l-desc">Coordina sesiones, operaciones y persistencia de datos.</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="l-name">🧱 Modelos (Clases)</div>
+        <div class="l-desc">Cliente, CuentaAhorros, CuentaCorriente, TarjetaCredito, Movimiento.</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="l-name">💾 localStorage</div>
+        <div class="l-desc">Guarda los datos en el navegador. No hay servidor ni base de datos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · VERSIÓN MÓVIL -->
+  <section class="slide">
+    <div class="kicker">Multiplataforma</div>
+    <h1 class="slide-title">Diseño adaptable</h1>
+    <p class="slide-text">
+      Mi Plata funciona en computadora y en celular. En móvil aparece una
+      <span class="highlight">barra de navegación inferior</span> y el contenido se reorganiza.
+    </p>
+    <div class="phone">
+      <div class="phone-top">
+        <div class="phone-card">
+          <div class="pc-lbl">Cuenta de Ahorros</div>
+          <div class="pc-val">$ 12.450.000</div>
+        </div>
+        <div class="phone-card">
+          <div class="pc-lbl">Cuenta Corriente</div>
+          <div class="pc-val">$ 3.120.500</div>
+        </div>
+        <div class="phone-card">
+          <div class="pc-lbl">Tarjeta de Crédito</div>
+          <div class="pc-val">$ 5.000.000</div>
+        </div>
+      </div>
+      <div class="phone-nav">
+        <span class="on">⊞</span><span>💳</span><span>↔</span><span>🕐</span><span>👤</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · CIERRE -->
+  <section class="slide dark">
+    <div class="kicker">En resumen</div>
+    <h1 class="slide-title" style="color:#fff;">Mi Plata en números</h1>
+    <div class="stats">
+      <div class="stat"><div class="s-num">3</div><div class="s-lbl">Tipos de cuenta</div></div>
+      <div class="stat"><div class="s-num">13</div><div class="s-lbl">Páginas</div></div>
+      <div class="stat"><div class="s-num">78</div><div class="s-lbl">Pruebas QA superadas</div></div>
+      <div class="stat"><div class="s-num">100%</div><div class="s-lbl">Responsive</div></div>
+    </div>
+    <p class="slide-text" style="margin-top:38px;">
+      Un proyecto que simula la experiencia bancaria completa, construido
+      con fundamentos web sólidos.
+    </p>
+    <div class="authors" style="margin-top:26px;"><strong>¡Gracias por tu atención!</strong></div>
+  </section>
+
+</div>
+
+<button class="nav-btn" id="prevBtn" aria-label="Anterior">‹</button>
+<button class="nav-btn" id="nextBtn" aria-label="Siguiente">›</button>
+<div class="counter" id="counter">1 / 11</div>
+<div class="dots" id="dots"></div>
+<div class="hint">← → para navegar</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  const prevBtn  = document.getElementById('prevBtn');
+  const nextBtn  = document.getElementById('nextBtn');
+  const counter  = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const dotsBox  = document.getElementById('dots');
+
+  // Crear puntos de navegación
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.addEventListener('click', () => goTo(i));
+    dotsBox.appendChild(d);
+  });
+  const dots = Array.from(dotsBox.children);
+
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    counter.textContent = `${current + 1} / ${total}`;
+    progress.style.width = `${((current + 1) / total) * 100}%`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function goTo(i) {
+    current = Math.max(0, Math.min(total - 1, i));
+    render();
+  }
+  const next = () => goTo(current + 1);
+  const prev = () => goTo(current - 1);
+
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')                    { e.preventDefault(); prev(); }
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End')  goTo(total - 1);
+  });
+
+  // Navegación táctil (swipe) en móvil
+  let touchX = null;
+  document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (dx < -50) next();
+    if (dx >  50) prev();
+    touchX = null;
+  });
+
+  render();
+</script>
+</body>
+</html>
